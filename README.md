@@ -103,3 +103,4 @@ each stable Rust version for 6 months after it is
 generally translates to support for the most recent 3 to 4 stable Rust versions.
 
 We enforce this policy using a [MSRV CI Check](https://github.com/search?q=repo%3Aapache%2Fdatafusion+rust-version+language%3ATOML+path%3A%2F%5ECargo.toml%2F&type=code)
+
