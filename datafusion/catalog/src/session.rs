@@ -28,13 +28,42 @@ use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-/// Execution context which access to the session state kept by DataFusion.
+/// Interface for accessing [`SessionState`] from the catalog.
 ///
-/// Note that this trait is implemented by the DataFusion core, and you typically
-/// do not need to implement it. When this trait is backed by the core's
-/// `SessionState` you can unwrap it using a `downcast_ref`
-/// (`.as_any().downcast_ref::<SessionState>().unwrap()`). This functionality
-/// is provided to facilitate transition period, avoid depending on it.
+/// This trait provides access to the information needed to plan and execute
+/// queries, such as configuration, functions, and runtime environment. See the
+/// documentation on [`SessionState`] for more information.
+///
+/// Historically, the `SessionState` struct was passed directly to catalog
+/// traits such as [`TableProvider`], which required a direct dependency on the
+/// DataFusion core. The interface required is now defined by this trait. See
+/// [#10782] for more details.
+///
+/// [#10782]: https://github.com/apache/datafusion/issues/10782
+///
+/// # Migration from `SessionState`
+///
+/// Using trait methods is preferred, as the implementation may change in future
+/// versions. However, you can downcast a `Session` to a `SessionState` as shown
+/// in the example below. If you find yourself needing to do this, please open
+/// an issue on the DataFusion repository so we can extend the trait to provide
+/// the required information.
+///
+/// ```
+/// # use datafusion_catalog::Session;
+/// # use datafusion_common::{Result, exec_datafusion_err};
+/// struct SessionState {}
+/// // Given a `Session` reference, get the concrete `SessionState` reference
+/// // Note: this may stop working in future versions,
+/// fn session_state_from_session(session: &dyn Session) -> Result<&SessionState> {
+///    session.as_any()
+///     .downcast_ref::<SessionState>()
+///     .ok_or_else(|| exec_datafusion_err!("Failed to downcast Session to SessionState"))
+/// }
+/// ```
+///
+/// [`SessionState`]: https://docs.rs/datafusion/latest/datafusion/execution/session_state/struct.SessionState.html
+/// [TableProvider]: crate::TableProvider
 #[async_trait]
 pub trait Session: Send + Sync {
     /// Return the session ID
@@ -43,7 +72,7 @@ pub trait Session: Send + Sync {
     /// Return the [`SessionConfig`]
     fn config(&self) -> &SessionConfig;
 
-    /// return the configuration options
+    /// return the [`ConfigOptions`]
     fn config_options(&self) -> &ConfigOptions {
         self.config().options()
     }
