@@ -28,6 +28,13 @@ use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
 
+/// Execution context which access to the session state kept by DataFusion.
+///
+/// Note that this trait is implemented by the DataFusion core, and you typically
+/// do not need to implement it. When this trait is backed by the core's
+/// `SessionState` you can unwrap it using a `downcast_ref`
+/// (`.as_any().downcast_ref::<SessionState>().unwrap()`). This functionality
+/// is provided to facilitate transition period, avoid depending on it.
 #[async_trait]
 pub trait CatalogSession: Send + Sync {
     /// Return the session ID
