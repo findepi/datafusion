@@ -51,7 +51,7 @@ use datafusion_physical_expr::{
 };
 
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use futures::{future, stream, StreamExt, TryStreamExt};
 use itertools::Itertools;
 use object_store::ObjectStore;
@@ -736,7 +736,7 @@ impl TableProvider for ListingTable {
 
     async fn scan(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         projection: Option<&Vec<usize>>,
         filters: &[Expr],
         limit: Option<usize>,
@@ -855,7 +855,7 @@ impl TableProvider for ListingTable {
 
     async fn insert_into(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         input: Arc<dyn ExecutionPlan>,
         overwrite: bool,
     ) -> Result<Arc<dyn ExecutionPlan>> {

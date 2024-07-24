@@ -20,7 +20,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use datafusion_expr::CreateExternalTable;
 pub use datafusion_expr::{TableProviderFilterPushDown, TableType};
 
@@ -50,7 +50,7 @@ impl DefaultTableFactory {
 impl TableProviderFactory for DefaultTableFactory {
     async fn create(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         cmd: &CreateExternalTable,
     ) -> Result<Arc<dyn TableProvider>> {
         let mut unbounded = cmd.unbounded;

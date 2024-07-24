@@ -22,7 +22,7 @@ use std::sync::Arc;
 
 use arrow::datatypes::SchemaRef;
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use datafusion_physical_plan::work_table::WorkTableExec;
 
 use crate::{
@@ -77,7 +77,7 @@ impl TableProvider for CteWorkTable {
 
     async fn scan(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         _projection: Option<&Vec<usize>>,
         _filters: &[Expr],
         _limit: Option<usize>,

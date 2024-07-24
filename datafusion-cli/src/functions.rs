@@ -22,7 +22,7 @@ use arrow::record_batch::RecordBatch;
 use arrow::util::pretty::pretty_format_batches;
 use async_trait::async_trait;
 
-use datafusion::catalog::CatalogSession;
+use datafusion::catalog::Session;
 use datafusion::common::{plan_err, Column};
 use datafusion::datasource::function::TableFunctionImpl;
 use datafusion::datasource::TableProvider;
@@ -234,7 +234,7 @@ impl TableProvider for ParquetMetadataTable {
 
     async fn scan(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         projection: Option<&Vec<usize>>,
         _filters: &[Expr],
         _limit: Option<usize>,

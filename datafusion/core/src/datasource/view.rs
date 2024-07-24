@@ -21,7 +21,7 @@ use std::{any::Any, sync::Arc};
 
 use arrow::datatypes::SchemaRef;
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use datafusion_common::Column;
 use datafusion_expr::{LogicalPlanBuilder, TableProviderFilterPushDown};
 
@@ -103,7 +103,7 @@ impl TableProvider for ViewTable {
 
     async fn scan(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         projection: Option<&Vec<usize>>,
         filters: &[Expr],
         limit: Option<usize>,

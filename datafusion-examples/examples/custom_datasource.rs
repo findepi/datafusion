@@ -37,7 +37,7 @@ use datafusion_expr::LogicalPlanBuilder;
 use datafusion_physical_expr::EquivalenceProperties;
 
 use async_trait::async_trait;
-use datafusion::catalog::CatalogSession;
+use datafusion::catalog::Session;
 use tokio::time::timeout;
 
 /// This example demonstrates executing a simple query against a custom datasource
@@ -176,7 +176,7 @@ impl TableProvider for CustomDataSource {
 
     async fn scan(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         projection: Option<&Vec<usize>>,
         // filters and limit can be used here to inject some push-down operations if needed
         _filters: &[Expr],

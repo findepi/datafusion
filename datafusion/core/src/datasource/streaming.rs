@@ -26,7 +26,7 @@ use async_trait::async_trait;
 use crate::datasource::TableProvider;
 use crate::physical_plan::streaming::{PartitionStream, StreamingTableExec};
 use crate::physical_plan::ExecutionPlan;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use datafusion_common::{plan_err, Result};
 use datafusion_expr::{Expr, TableType};
 use log::debug;
@@ -84,7 +84,7 @@ impl TableProvider for StreamingTable {
 
     async fn scan(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         projection: Option<&Vec<usize>>,
         _filters: &[Expr],
         limit: Option<usize>,

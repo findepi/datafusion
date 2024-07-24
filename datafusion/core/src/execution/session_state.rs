@@ -33,7 +33,7 @@ use crate::physical_planner::{DefaultPhysicalPlanner, PhysicalPlanner};
 use arrow_schema::{DataType, SchemaRef};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use datafusion_common::alias::AliasGenerator;
 use datafusion_common::config::{ConfigExtension, ConfigOptions, TableOptions};
 use datafusion_common::display::{PlanType, StringifiedPlan, ToStringifiedPlan};
@@ -184,7 +184,7 @@ impl Debug for SessionState {
 }
 
 #[async_trait]
-impl CatalogSession for SessionState {
+impl Session for SessionState {
     fn session_id(&self) -> &str {
         self.session_id()
     }

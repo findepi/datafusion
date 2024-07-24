@@ -36,7 +36,7 @@ use std::sync::Arc;
 /// (`.as_any().downcast_ref::<SessionState>().unwrap()`). This functionality
 /// is provided to facilitate transition period, avoid depending on it.
 #[async_trait]
-pub trait CatalogSession: Send + Sync {
+pub trait Session: Send + Sync {
     /// Return the session ID
     fn session_id(&self) -> &str;
 
@@ -92,9 +92,9 @@ pub trait CatalogSession: Send + Sync {
     fn as_any(&self) -> &dyn Any;
 }
 
-/// Create a new task context instance from CatalogSession
-impl From<&dyn CatalogSession> for TaskContext {
-    fn from(state: &dyn CatalogSession) -> Self {
+/// Create a new task context instance from Session
+impl From<&dyn Session> for TaskContext {
+    fn from(state: &dyn Session) -> Self {
         let task_id = None;
         TaskContext::new(
             task_id,

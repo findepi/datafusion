@@ -49,7 +49,7 @@ use datafusion_expr::{CreateExternalTable, Expr, TableType};
 use datafusion_physical_expr::EquivalenceProperties;
 
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use futures::Stream;
 use tempfile::TempDir;
 // backwards compatibility
@@ -177,7 +177,7 @@ pub struct TestTableFactory {}
 impl TableProviderFactory for TestTableFactory {
     async fn create(
         &self,
-        _: &dyn CatalogSession,
+        _: &dyn Session,
         cmd: &CreateExternalTable,
     ) -> Result<Arc<dyn TableProvider>> {
         Ok(Arc::new(TestTableProvider {
@@ -213,7 +213,7 @@ impl TableProvider for TestTableProvider {
 
     async fn scan(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         _projection: Option<&Vec<usize>>,
         _filters: &[Expr],
         _limit: Option<usize>,

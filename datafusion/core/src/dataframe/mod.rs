@@ -58,7 +58,7 @@ use datafusion_expr::{
 use datafusion_functions_aggregate::expr_fn::{avg, count, median, stddev, sum};
 
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 
 /// Contains options that control how data is
 /// written out from a DataFrame
@@ -1658,7 +1658,7 @@ impl TableProvider for DataFrameTableProvider {
 
     async fn scan(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         projection: Option<&Vec<usize>>,
         filters: &[Expr],
         limit: Option<usize>,

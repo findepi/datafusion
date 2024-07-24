@@ -41,7 +41,7 @@ use datafusion_physical_plan::streaming::{PartitionStream, StreamingTableExec};
 use datafusion_physical_plan::{DisplayAs, DisplayFormatType, ExecutionPlan};
 
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use futures::StreamExt;
 
 /// A [`TableProviderFactory`] for [`StreamTable`]
@@ -52,7 +52,7 @@ pub struct StreamTableFactory {}
 impl TableProviderFactory for StreamTableFactory {
     async fn create(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         cmd: &CreateExternalTable,
     ) -> Result<Arc<dyn TableProvider>> {
         let schema: SchemaRef = Arc::new(cmd.schema.as_ref().into());
@@ -322,7 +322,7 @@ impl TableProvider for StreamTable {
 
     async fn scan(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         projection: Option<&Vec<usize>>,
         _filters: &[Expr],
         limit: Option<usize>,
@@ -347,7 +347,7 @@ impl TableProvider for StreamTable {
 
     async fn insert_into(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         input: Arc<dyn ExecutionPlan>,
         _overwrite: bool,
     ) -> Result<Arc<dyn ExecutionPlan>> {

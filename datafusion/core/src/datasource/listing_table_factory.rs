@@ -32,7 +32,7 @@ use datafusion_common::{config_datafusion_err, Result};
 use datafusion_expr::CreateExternalTable;
 
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 
 /// A `TableProviderFactory` capable of creating new `ListingTable`s
 #[derive(Debug, Default)]
@@ -49,7 +49,7 @@ impl ListingTableFactory {
 impl TableProviderFactory for ListingTableFactory {
     async fn create(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         cmd: &CreateExternalTable,
     ) -> Result<Arc<dyn TableProvider>> {
         // TODO remove downcast_ref from here. Should file format factory be an extension to session state?

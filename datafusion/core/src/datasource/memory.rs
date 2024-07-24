@@ -42,7 +42,7 @@ use datafusion_execution::TaskContext;
 use datafusion_physical_plan::metrics::MetricsSet;
 
 use async_trait::async_trait;
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use futures::StreamExt;
 use log::debug;
 use parking_lot::Mutex;
@@ -207,7 +207,7 @@ impl TableProvider for MemTable {
 
     async fn scan(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         projection: Option<&Vec<usize>>,
         _filters: &[Expr],
         _limit: Option<usize>,
@@ -259,7 +259,7 @@ impl TableProvider for MemTable {
     /// * A plan that returns the number of rows written.
     async fn insert_into(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         input: Arc<dyn ExecutionPlan>,
         overwrite: bool,
     ) -> Result<Arc<dyn ExecutionPlan>> {

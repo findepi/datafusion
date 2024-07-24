@@ -23,7 +23,7 @@ use arrow::datatypes::Int32Type;
 use arrow::util::pretty::pretty_format_batches;
 use arrow_schema::SchemaRef;
 use async_trait::async_trait;
-use datafusion::catalog::CatalogSession;
+use datafusion::catalog::Session;
 use datafusion::datasource::listing::PartitionedFile;
 use datafusion::datasource::physical_plan::{
     parquet::StatisticsConverter,
@@ -222,7 +222,7 @@ impl TableProvider for IndexTableProvider {
 
     async fn scan(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         projection: Option<&Vec<usize>>,
         filters: &[Expr],
         limit: Option<usize>,

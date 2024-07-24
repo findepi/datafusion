@@ -44,7 +44,7 @@ use datafusion::physical_plan::{ExecutionPlan, SendableRecordBatchStream};
 use datafusion_common::{assert_contains, Result};
 
 use datafusion::prelude::{SessionConfig, SessionContext};
-use datafusion_catalog::CatalogSession;
+use datafusion_catalog::Session;
 use datafusion_execution::TaskContext;
 use test_utils::AccessLogGenerator;
 
@@ -792,7 +792,7 @@ impl TableProvider for SortedTableProvider {
 
     async fn scan(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         projection: Option<&Vec<usize>>,
         _filters: &[Expr],
         _limit: Option<usize>,

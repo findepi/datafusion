@@ -40,7 +40,7 @@ use datafusion_common::cast::as_float64_array;
 use datafusion_common::DataFusionError;
 
 use async_trait::async_trait;
-use datafusion::catalog::CatalogSession;
+use datafusion::catalog::Session;
 use log::info;
 use tempfile::TempDir;
 
@@ -222,7 +222,7 @@ pub async fn register_temp_table(ctx: &SessionContext) {
 
         async fn scan(
             &self,
-            _state: &dyn CatalogSession,
+            _state: &dyn Session,
             _: Option<&Vec<usize>>,
             _: &[Expr],
             _: Option<usize>,

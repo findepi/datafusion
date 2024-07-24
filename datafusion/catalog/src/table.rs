@@ -18,7 +18,7 @@
 use std::any::Any;
 use std::sync::Arc;
 
-use crate::session::CatalogSession;
+use crate::session::Session;
 use arrow_schema::SchemaRef;
 use async_trait::async_trait;
 use datafusion_common::Result;
@@ -147,7 +147,7 @@ pub trait TableProvider: Sync + Send {
     /// to return as a final result.
     async fn scan(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         projection: Option<&Vec<usize>>,
         filters: &[Expr],
         limit: Option<usize>,
@@ -187,7 +187,7 @@ pub trait TableProvider: Sync + Send {
     /// # use std::sync::Arc;
     /// # use arrow_schema::SchemaRef;
     /// # use async_trait::async_trait;
-    /// # use datafusion_catalog::{TableProvider, CatalogSession};
+    /// # use datafusion_catalog::{TableProvider, Session};
     /// # use datafusion_common::Result;
     /// # use datafusion_expr::{Expr, TableProviderFilterPushDown, TableType};
     /// # use datafusion_physical_plan::ExecutionPlan;
@@ -199,7 +199,7 @@ pub trait TableProvider: Sync + Send {
     /// # fn as_any(&self) -> &dyn Any { todo!() }
     /// # fn schema(&self) -> SchemaRef { todo!() }
     /// # fn table_type(&self) -> TableType { todo!() }
-    /// # async fn scan(&self, s: &dyn CatalogSession, p: Option<&Vec<usize>>, f: &[Expr], l: Option<usize>) -> Result<Arc<dyn ExecutionPlan>> {
+    /// # async fn scan(&self, s: &dyn Session, p: Option<&Vec<usize>>, f: &[Expr], l: Option<usize>) -> Result<Arc<dyn ExecutionPlan>> {
     ///         todo!()
     /// # }
     ///     // Override the supports_filters_pushdown to evaluate which expressions
@@ -269,7 +269,7 @@ pub trait TableProvider: Sync + Send {
     /// [`DataSinkExec`]: datafusion_physical_plan::insert::DataSinkExec
     async fn insert_into(
         &self,
-        _state: &dyn CatalogSession,
+        _state: &dyn Session,
         _input: Arc<dyn ExecutionPlan>,
         _overwrite: bool,
     ) -> Result<Arc<dyn ExecutionPlan>> {
@@ -286,7 +286,7 @@ pub trait TableProviderFactory: Sync + Send {
     /// Create a TableProvider with the given url
     async fn create(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         cmd: &CreateExternalTable,
     ) -> Result<Arc<dyn TableProvider>>;
 }

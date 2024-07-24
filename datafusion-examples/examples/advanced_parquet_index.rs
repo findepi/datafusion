@@ -19,7 +19,7 @@ use arrow::array::{ArrayRef, Int32Array, RecordBatch, StringArray};
 use arrow_schema::SchemaRef;
 use async_trait::async_trait;
 use bytes::Bytes;
-use datafusion::catalog::CatalogSession;
+use datafusion::catalog::Session;
 use datafusion::datasource::listing::PartitionedFile;
 use datafusion::datasource::physical_plan::parquet::{
     ParquetAccessPlan, ParquetExecBuilder,
@@ -271,7 +271,7 @@ impl IndexTableProvider {
     /// to a single predicate like `a = 1 AND b = 2` suitable for execution
     fn filters_to_predicate(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         filters: &[Expr],
     ) -> Result<Arc<dyn PhysicalExpr>> {
         let df_schema = DFSchema::try_from(self.schema())?;
@@ -463,7 +463,7 @@ impl TableProvider for IndexTableProvider {
 
     async fn scan(
         &self,
-        state: &dyn CatalogSession,
+        state: &dyn Session,
         projection: Option<&Vec<usize>>,
         filters: &[Expr],
         limit: Option<usize>,
