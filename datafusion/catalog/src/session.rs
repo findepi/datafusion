@@ -52,7 +52,7 @@ use std::sync::Arc;
 /// ```
 /// # use datafusion_catalog::Session;
 /// # use datafusion_common::{Result, exec_datafusion_err};
-/// struct SessionState {}
+/// # struct SessionState {}
 /// // Given a `Session` reference, get the concrete `SessionState` reference
 /// // Note: this may stop working in future versions,
 /// fn session_state_from_session(session: &dyn Session) -> Result<&SessionState> {
@@ -63,7 +63,7 @@ use std::sync::Arc;
 /// ```
 ///
 /// [`SessionState`]: https://docs.rs/datafusion/latest/datafusion/execution/session_state/struct.SessionState.html
-/// [TableProvider]: crate::TableProvider
+/// [`TableProvider`]: crate::TableProvider
 #[async_trait]
 pub trait Session: Send + Sync {
     /// Return the session ID
