@@ -22,7 +22,7 @@ use std::mem;
 use std::sync::Arc;
 
 use super::PartitionedFile;
-use crate::datasource::listing::ListingTableUrl;
+use crate::ListingTableUrl;
 use crate::execution::context::SessionState;
 use crate::logical_expr::{BinaryExpr, Operator};
 use crate::{error::Result, scalar::ScalarValue};

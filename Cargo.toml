@@ -21,6 +21,7 @@ members = [
     "datafusion/common",
     "datafusion/common-runtime",
     "datafusion/catalog",
+    "datafusion/catalog-listing",
     "datafusion/core",
     "datafusion/expr",
     "datafusion/execution",
