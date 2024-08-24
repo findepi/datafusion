@@ -141,6 +141,7 @@ zstd = { version = "0.13", optional = true, default-features = false }
 
 [dev-dependencies]
 arrow-buffer = { workspace = true }
+assertor = "0.0.2"
 async-trait = { workspace = true }
 bigdecimal = { workspace = true }
 criterion = { version = "0.5", features = ["async_tokio"] }

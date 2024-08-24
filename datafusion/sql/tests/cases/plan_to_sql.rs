@@ -144,6 +144,7 @@ fn roundtrip_statement() -> Result<()> {
             sum(id) OVER (PARTITION BY first_name ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) from person"#,
             "SELECT id, sum(id) OVER (PARTITION BY first_name ROWS BETWEEN 5 PRECEDING AND 2 FOLLOWING) from person",
             "WITH t1 AS (SELECT j1_id AS id, j1_string name FROM j1), t2 AS (SELECT j2_id AS id, j2_string name FROM j2) SELECT * FROM t1 JOIN t2 USING (id, name)",
+            // SHOW TABLES, SHOW COLUMNS are tested elsewhere as they require information_schema, so the core.
         ];
 
     // For each test sql string, we transform as follows:

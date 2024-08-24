@@ -63,6 +63,7 @@ pub mod joins;
 mod path_partition;
 pub mod select;
 mod sql_api;
+mod plan_to_sql;
 
 async fn register_aggregate_csv_by_sql(ctx: &SessionContext) {
     let testdata = datafusion::test_util::arrow_test_data();
