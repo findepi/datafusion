@@ -381,7 +381,7 @@ impl<'a> StringArrayType<'a> for &'a StringViewArray {
 /// 2. Avoids creating / incrementally creating a `NullBufferBuilder`
 pub(crate) struct StringArrayBuilder {
     offsets_buffer: MutableBuffer,
-    value_buffer: MutableBuffer,
+    pub value_buffer: MutableBuffer,
 }
 
 impl StringArrayBuilder {

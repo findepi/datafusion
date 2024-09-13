@@ -26,6 +26,7 @@ pub mod bit_length;
 pub mod btrim;
 pub mod chr;
 pub mod common;
+pub mod my_concat;
 pub mod concat;
 pub mod concat_ws;
 pub mod contains;
