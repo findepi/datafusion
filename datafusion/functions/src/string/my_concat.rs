@@ -112,31 +112,51 @@ pub fn concat_arrays(a: &StringArray, b: &StringArray) -> StringArray {
 
     // the straightforward implementation is faster than variadic concat implementation from DF by ~18%.
     let data_size = a.values().len() + b.values().len();
-    // let data_size = 64; // disable pre-sizing output. 10% perf hit
+    let data_size = 64; // disable pre-sizing output. ~35% perf hit (compared to ours optimal)
+                        // sizing can be made adaptive, instead of being function's logic
     let mut builder = StringArrayBuilder::with_capacity(len, data_size);
+    let mut builder = StringBuilder::with_capacity(len, data_size);
     for i in 0..len {
-        // TODO incorrect! we should check for nulls, not coalesce them with ''
-        if a.is_valid(i) {
-            builder
-                .value_buffer
-                .extend_from_slice(a.value(i).as_bytes());
-        }
-        if b.is_valid(i) {
-            builder
-                .value_buffer
-                .extend_from_slice(b.value(i).as_bytes());
-        }
-        if false {
+        // // this is optimal but unpacks logic
+        // // FIXME semantically incorrect, but shouldn't matter. our test case is all non-null
+        // if a.is_valid(i) {
+        //     builder
+        //         .value_buffer
+        //         .extend_from_slice(a.value(i).as_bytes());
+        // }
+        // if b.is_valid(i) {
+        //     builder
+        //         .value_buffer
+        //         .extend_from_slice(b.value(i).as_bytes());
+        // }
 
+        // // just joining the IFs into one gives another 10% boost (semantic difference! and for the better)
+        // if a.is_valid(i) && b.is_valid(i) {
+        //     builder
+        //         .value_buffer
+        //         .extend_from_slice(a.value(i).as_bytes());
+        //     builder
+        //         .value_buffer
+        //         .extend_from_slice(b.value(i).as_bytes());
+        // }
+
+        // actually_do_concat_into_buffer is as fast as direct buffer writing above
+        if a.is_valid(i) && b.is_valid(i) {
+            //actually_do_concat_into_buffer(a.value(i), b.value(i), &mut MutableBufferWriter(&mut builder.value_buffer));
+            actually_do_concat_into_buffer(a.value(i), b.value(i), &mut builder);
         }
+
+        // // having logic as `actually_do_concat(..) -> String` gives x4-6 perf hit. (#inline does not help)
         // if a.is_valid(i) && b.is_valid(i) {
         //     let s = actually_do_concat(a.value(i), b.value(i));
         //     builder.value_buffer.extend_from_slice(s.as_bytes());
         // }
 
-        builder.append_offset();
+        //builder.append_offset();
+        builder.append_value("");
     }
-    builder.finish(None)
+    //builder.finish(None)
+    builder.finish()
 
     // let mut result = arrow::array::StringBuilder::new();
     // for i in 0..a.len() {
@@ -175,22 +195,37 @@ pub fn concat_arrays(a: &StringArray, b: &StringArray) -> StringArray {
     // let result = StringArray::from(result);
 }
 
-// This is the only place where logic happens
-fn actually_do_concat(a: &str, b: &str) -> String {
-    format!("{}{}", a, b)
+struct MutableBufferWriter<'a>(&'a mut MutableBuffer);
+impl std::fmt::Write for MutableBufferWriter<'_> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        self.0.extend_from_slice(s.as_bytes());
+        Ok(())
+    }
 }
-// fn actually_do_concat_into_buffer(a: &str, b: &str, output: &mut impl std::fmt::Write) {
-//     write!(output, "{}{}", a, b).unwrap()
-// }
+
+// This is the only place where logic happens
+// #[inline(always)]
+fn actually_do_concat(a: &str, b: &str) -> String {
+    // format! is slower
+    //format!("{}{}", a, b)
+    a.to_string() + b
+}
+fn actually_do_concat_into_buffer(a: &str, b: &str, output: &mut impl std::fmt::Write) {
+    // using write! yields 45% perf hit
+    // write!(output, "{}{}", a, b).unwrap()
+    output.write_str(a).unwrap();
+    output.write_str(b).unwrap();
+}
 
 #[cfg(test)]
 mod tests {
+    use std::fmt::Write;
     use super::*;
+    use crate::string::concat::ConcatFunc;
     use crate::utils::test::test_function;
     use arrow::array::{Array, LargeStringArray, StringViewArray};
     use arrow::array::{ArrayRef, StringArray};
     use DataType::*;
-    use crate::string::concat::ConcatFunc;
 
     #[test]
     fn test_functions() -> Result<()> {
