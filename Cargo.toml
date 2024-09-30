@@ -44,7 +44,6 @@ members = [
     "datafusion/sql",
     "datafusion/sqllogictest",
     "datafusion/substrait",
-    "datafusion/types",
     "datafusion/wasmtest",
     "datafusion-examples",
     "test-utils",
@@ -116,7 +115,6 @@ datafusion-proto-common = { path = "datafusion/proto-common", version = "42.0.0"
 datafusion-sql = { path = "datafusion/sql", version = "42.0.0" }
 datafusion-sqllogictest = { path = "datafusion/sqllogictest", version = "42.0.0" }
 datafusion-substrait = { path = "datafusion/substrait", version = "42.0.0" }
-datafusion-types = { path = "datafusion/types", version = "42.0.0" }
 doc-comment = "0.3"
 env_logger = "0.11"
 futures = "0.3"
