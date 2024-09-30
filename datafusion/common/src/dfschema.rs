@@ -941,6 +941,10 @@ pub trait ExprSchema: std::fmt::Debug {
     /// What is the datatype of this column?
     fn data_type(&self, col: &Column) -> Result<&DataType>;
 
+    fn get_type(&self, col: &Column) -> Result<TypeRef> {
+        todo!()
+    }
+
     /// Returns the column's optional metadata.
     fn metadata(&self, col: &Column) -> Result<&HashMap<String, String>>;
 

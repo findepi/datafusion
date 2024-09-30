@@ -16,10 +16,8 @@
 # under the License.
 
 [package]
-name = "datafusion-expr"
-description = "Logical plan and expression representation for DataFusion query engine"
-keywords = ["datafusion", "logical", "plan", "expressions"]
-readme = "README.md"
+name = "datafusion-types"
+description = "DataFusion types"
 version = { workspace = true }
 edition = { workspace = true }
 homepage = { workspace = true }
@@ -32,29 +30,13 @@ rust-version = { workspace = true }
 workspace = true
 
 [lib]
-name = "datafusion_expr"
-path = "src/lib.rs"
-
-[features]
+name = "datafusion_types"
 
 [dependencies]
-ahash = { workspace = true }
 arrow = { workspace = true }
-arrow-array = { workspace = true }
-arrow-buffer = { workspace = true }
-chrono = { workspace = true }
-datafusion-common = { workspace = true }
-datafusion-expr-common = { workspace = true }
-datafusion-functions-aggregate-common = { workspace = true }
-datafusion-functions-window-common = { workspace = true }
-datafusion-physical-expr-common = { workspace = true }
-datafusion-types = { workspace = true }
-paste = "^1.0"
-serde_json = { workspace = true }
-sqlparser = { workspace = true }
-strum = { version = "0.26.1", features = ["derive"] }
-strum_macros = "0.26.0"
+# datafusion-common = { workspace = true } # FIXME or circular dependency
 
-[dev-dependencies]
-ctor = { workspace = true }
-env_logger = { workspace = true }
+# TODO move to workspace
+strum = { version = "0.26.1", features = ["derive"] }
+# TODO move to workspace
+strum_macros = "0.26.0"

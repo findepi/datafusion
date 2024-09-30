@@ -34,11 +34,14 @@ use datafusion_common::{
 use datafusion_functions_window_common::field::WindowUDFFieldArgs;
 use std::collections::HashMap;
 use std::sync::Arc;
+use datafusion_types::TypeRef;
 
 /// trait to allow expr to typable with respect to a schema
 pub trait ExprSchemable {
     /// given a schema, return the type of the expr
     fn get_type(&self, schema: &dyn ExprSchema) -> Result<DataType>;
+
+    fn get_df_type(&self, schema: &dyn ExprSchema) -> Result<TypeRef>;
 
     /// given a schema, return the nullability of the expr
     fn nullable(&self, input_schema: &dyn ExprSchema) -> Result<bool>;
@@ -225,6 +228,46 @@ impl ExprSchemable for Expr {
             Expr::GroupingSet(_) => {
                 // grouping sets do not really have a type and do not appear in projections
                 Ok(DataType::Null)
+            }
+        }
+    }
+
+    fn get_df_type(&self, schema: &dyn ExprSchema) -> Result<TypeRef> {
+        match self {
+            Expr::Alias(alias) => alias.get_df_type(schema),
+            Expr::Column(_) => {}
+            Expr::ScalarVariable(_, _)|
+            Expr::Literal(_)|
+            Expr::BinaryExpr(_)|
+            Expr::Like(_)|
+            Expr::SimilarTo(_)|
+            Expr::Not(_)|
+            Expr::IsNotNull(_)|
+            Expr::IsNull(_)|
+            Expr::IsTrue(_)|
+            Expr::IsFalse(_)|
+            Expr::IsUnknown(_)|
+            Expr::IsNotTrue(_)|
+            Expr::IsNotFalse(_)|
+            Expr::IsNotUnknown(_)|
+            Expr::Negative(_)|
+            Expr::Between(_)|
+            Expr::Case(_)|
+            Expr::Cast(_)|
+            Expr::TryCast(_)|
+            Expr::ScalarFunction(_)|
+            Expr::AggregateFunction(_)|
+            Expr::WindowFunction(_)|
+            Expr::InList(_)|
+            Expr::Exists(_)|
+            Expr::InSubquery(_)|
+            Expr::ScalarSubquery(_)|
+            Expr::Wildcard { .. }|
+            Expr::GroupingSet(_)|
+            Expr::Placeholder(_)|
+            Expr::OuterReferenceColumn(_, _)|
+            Expr::Unnest(_) => {
+                todo!()
             }
         }
     }

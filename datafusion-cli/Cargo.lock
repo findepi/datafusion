@@ -1345,6 +1345,7 @@ dependencies = [
  "datafusion-functions-aggregate-common",
  "datafusion-functions-window-common",
  "datafusion-physical-expr-common",
+ "datafusion-types",
  "paste",
  "serde_json",
  "sqlparser",
@@ -1575,6 +1576,15 @@ dependencies = [
  "regex",
  "sqlparser",
  "strum 0.26.3",
+]
+
+[[package]]
+name = "datafusion-types"
+version = "42.0.0"
+dependencies = [
+ "arrow",
+ "strum 0.26.3",
+ "strum_macros 0.26.4",
 ]
 
 [[package]]
