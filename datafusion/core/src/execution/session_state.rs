@@ -56,7 +56,6 @@ use datafusion_expr::{
     AggregateUDF, Explain, Expr, ExprSchemable, LogicalPlan, ScalarUDF, TableSource,
     WindowUDF,
 };
-use datafusion_optimizer::simplify_expressions::ExprSimplifier;
 use datafusion_optimizer::{
     Analyzer, AnalyzerRule, Optimizer, OptimizerConfig, OptimizerRule,
 };
@@ -78,6 +77,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use url::Url;
 use uuid::Uuid;
+use datafusion_optimizer::analyzer::type_coercion::TypeCoercionRewriter;
 
 /// `SessionState` contains all the necessary state to plan and execute queries,
 /// such as configuration, functions, and runtime environment. Please see the
@@ -734,10 +734,9 @@ impl SessionState {
         expr: Expr,
         df_schema: &DFSchema,
     ) -> datafusion_common::Result<Arc<dyn PhysicalExpr>> {
-        let simplifier =
-            ExprSimplifier::new(SessionSimplifyProvider::new(self, df_schema));
         // apply type coercion here to ensure types match
-        let mut expr = simplifier.coerce(expr, df_schema)?;
+        // TODO this should be done in the frontend layer, so that DataFusion core is dialect-agnostic
+        let mut expr = self.coerce(expr, df_schema)?;
 
         // rewrite Exprs to functions if necessary
         let config_options = self.config_options();
@@ -747,6 +746,16 @@ impl SessionState {
                 .data;
         }
         create_physical_expr(&expr, df_schema, self.execution_props())
+    }
+
+    /// Apply type coercion to an [`Expr`] so that it can be
+    /// evaluated as a [`PhysicalExpr`](datafusion_physical_expr::PhysicalExpr).
+    ///
+    /// See the [type coercion module](datafusion_expr::type_coercion)
+    /// documentation for more details on type coercion
+     fn coerce(&self, expr: Expr, schema: &DFSchema) -> datafusion_common::Result<Expr> {
+        let mut expr_rewrite = TypeCoercionRewriter { schema };
+        Ok(expr.rewrite(&mut expr_rewrite)?.data)
     }
 
     /// Return the session ID
@@ -1844,35 +1853,6 @@ impl QueryPlanner for DefaultQueryPlanner {
         planner
             .create_physical_plan(logical_plan, session_state)
             .await
-    }
-}
-
-struct SessionSimplifyProvider<'a> {
-    state: &'a SessionState,
-    df_schema: &'a DFSchema,
-}
-
-impl<'a> SessionSimplifyProvider<'a> {
-    fn new(state: &'a SessionState, df_schema: &'a DFSchema) -> Self {
-        Self { state, df_schema }
-    }
-}
-
-impl<'a> SimplifyInfo for SessionSimplifyProvider<'a> {
-    fn is_boolean_type(&self, expr: &Expr) -> datafusion_common::Result<bool> {
-        Ok(expr.get_type(self.df_schema)? == DataType::Boolean)
-    }
-
-    fn nullable(&self, expr: &Expr) -> datafusion_common::Result<bool> {
-        expr.nullable(self.df_schema)
-    }
-
-    fn execution_props(&self) -> &ExecutionProps {
-        self.state.execution_props()
-    }
-
-    fn get_data_type(&self, expr: &Expr) -> datafusion_common::Result<DataType> {
-        expr.get_type(self.df_schema)
     }
 }
 

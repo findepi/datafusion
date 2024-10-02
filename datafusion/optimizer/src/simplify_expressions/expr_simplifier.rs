@@ -41,7 +41,6 @@ use datafusion_expr::{
 use datafusion_expr::{expr::ScalarFunction, interval_arithmetic::NullableInterval};
 use datafusion_physical_expr::{create_physical_expr, execution_props::ExecutionProps};
 
-use crate::analyzer::type_coercion::TypeCoercionRewriter;
 use crate::simplify_expressions::guarantees::GuaranteeRewriter;
 use crate::simplify_expressions::regex::simplify_regex_expr;
 use crate::simplify_expressions::SimplifyInfo;
@@ -118,8 +117,6 @@ impl<S: SimplifyInfo> ExprSimplifier<S> {
     /// constants and applying algebraic simplifications.
     ///
     /// The types of the expression must match what operators expect,
-    /// or else an error may occur trying to evaluate. See
-    /// [`coerce`](Self::coerce) for a function to help.
     ///
     /// # Example:
     ///
@@ -216,16 +213,6 @@ impl<S: SimplifyInfo> ExprSimplifier<S> {
         // shorten inlist should be started after other inlist rules are applied
         expr = expr.rewrite(&mut shorten_in_list_simplifier).data()?;
         Ok((expr, num_cycles))
-    }
-
-    /// Apply type coercion to an [`Expr`] so that it can be
-    /// evaluated as a [`PhysicalExpr`](datafusion_physical_expr::PhysicalExpr).
-    ///
-    /// See the [type coercion module](datafusion_expr::type_coercion)
-    /// documentation for more details on type coercion
-    pub fn coerce(&self, expr: Expr, schema: &DFSchema) -> Result<Expr> {
-        let mut expr_rewrite = TypeCoercionRewriter { schema };
-        expr.rewrite(&mut expr_rewrite).data()
     }
 
     /// Input guarantees about the values of columns.
@@ -1821,25 +1808,6 @@ mod tests {
 
         let expr = lit(1) + lit(2);
         let expected = lit(3);
-        assert_eq!(expected, simplifier.simplify(expr).unwrap());
-    }
-
-    #[test]
-    fn basic_coercion() {
-        let schema = test_schema();
-        let props = ExecutionProps::new();
-        let simplifier = ExprSimplifier::new(
-            SimplifyContext::new(&props).with_schema(Arc::clone(&schema)),
-        );
-
-        // Note expr type is int32 (not int64)
-        // (1i64 + 2i32) < i
-        let expr = (lit(1i64) + lit(2i32)).lt(col("i"));
-        // should fully simplify to 3 < i (though i has been coerced to i64)
-        let expected = lit(3i64).lt(col("i"));
-
-        let expr = simplifier.coerce(expr, &schema).unwrap();
-
         assert_eq!(expected, simplifier.simplify(expr).unwrap());
     }
 

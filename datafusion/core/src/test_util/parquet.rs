@@ -29,8 +29,6 @@ use crate::datasource::object_store::ObjectStoreUrl;
 use crate::datasource::physical_plan::{FileScanConfig, ParquetExec};
 use crate::error::Result;
 use crate::logical_expr::execution_props::ExecutionProps;
-use crate::logical_expr::simplify::SimplifyContext;
-use crate::optimizer::simplify_expressions::ExprSimplifier;
 use crate::physical_expr::create_physical_expr;
 use crate::physical_plan::filter::FilterExec;
 use crate::physical_plan::metrics::MetricsSet;
@@ -155,13 +153,8 @@ impl TestParquetFile {
 
         let df_schema = self.schema.clone().to_dfschema_ref()?;
 
-        // run coercion on the filters to coerce types etc.
-        let props = ExecutionProps::new();
-        let context = SimplifyContext::new(&props).with_schema(df_schema.clone());
         let parquet_options = ctx.copied_table_options().parquet;
         if let Some(filter) = maybe_filter {
-            let simplifier = ExprSimplifier::new(context);
-            let filter = simplifier.coerce(filter, &df_schema).unwrap();
             let physical_filter_expr =
                 create_physical_expr(&filter, &df_schema, &ExecutionProps::default())?;
 

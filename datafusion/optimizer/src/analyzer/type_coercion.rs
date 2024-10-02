@@ -151,7 +151,7 @@ fn analyze_internal(
 
 /// Rewrite expressions to apply type coercion.
 pub struct TypeCoercionRewriter<'a> {
-    pub(crate) schema: &'a DFSchema,
+    pub schema: &'a DFSchema,
 }
 
 impl<'a> TypeCoercionRewriter<'a> {
