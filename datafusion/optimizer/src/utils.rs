@@ -21,7 +21,7 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 
 use crate::{OptimizerConfig, OptimizerRule};
 
-use datafusion_common::{Column, DFSchema, Result};
+use datafusion_common::{Column, Result};
 use datafusion_expr::expr_rewriter::replace_col;
 use datafusion_expr::{logical_plan::LogicalPlan, Expr};
 
@@ -78,23 +78,6 @@ pub(crate) fn has_all_column_refs(expr: &Expr, schema_cols: &HashSet<Column>) ->
         .filter(|c| column_refs.contains(c))
         .count()
         == column_refs.len()
-}
-
-pub(crate) fn collect_subquery_cols(
-    exprs: &[Expr],
-    subquery_schema: &DFSchema,
-) -> Result<BTreeSet<Column>> {
-    exprs.iter().try_fold(BTreeSet::new(), |mut cols, expr| {
-        let mut using_cols: Vec<Column> = vec![];
-        for col in expr.column_refs().into_iter() {
-            if subquery_schema.has_column(col) {
-                using_cols.push(col.clone());
-            }
-        }
-
-        cols.extend(using_cols);
-        Result::<_>::Ok(cols)
-    })
 }
 
 pub(crate) fn replace_qualified_name(

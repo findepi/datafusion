@@ -21,7 +21,7 @@ use datafusion_common::config::ConfigOptions;
 use datafusion_common::tree_node::{Transformed, TreeNode};
 use datafusion_common::Result;
 use datafusion_expr::{col, lit, Expr, LogicalPlan, LogicalPlanBuilder};
-use datafusion_optimizer::analyzer::AnalyzerRule;
+use datafusion_sql::analyzer::AnalyzerRule;
 use std::sync::{Arc, Mutex};
 
 /// This example demonstrates how to add your own [`AnalyzerRule`] to

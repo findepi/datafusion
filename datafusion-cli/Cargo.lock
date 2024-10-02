@@ -1574,6 +1574,7 @@ dependencies = [
  "datafusion-common",
  "datafusion-expr",
  "indexmap",
+ "itertools",
  "log",
  "regex",
  "sqlparser",

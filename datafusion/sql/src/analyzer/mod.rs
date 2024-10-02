@@ -20,7 +20,7 @@
 use std::fmt::Debug;
 use std::sync::Arc;
 
-use log::debug;
+use log::{debug, trace};
 
 use datafusion_common::config::ConfigOptions;
 use datafusion_common::instant::Instant;
@@ -37,7 +37,6 @@ use crate::analyzer::inline_table_scan::InlineTableScan;
 use crate::analyzer::resolve_grouping_function::ResolveGroupingFunction;
 use crate::analyzer::subquery::check_subquery_expr;
 use crate::analyzer::type_coercion::TypeCoercion;
-use crate::utils::log_plan;
 
 use self::function_rewrite::ApplyFunctionRewrites;
 
@@ -193,4 +192,10 @@ fn check_plan(plan: &LogicalPlan) -> Result<()> {
         })
     })
     .map(|_| ())
+}
+
+/// Log the plan in debug/tracing mode after some part of the optimizer runs
+fn log_plan(description: &str, plan: &LogicalPlan) {
+    debug!("{description}:\n{}\n", plan.display_indent());
+    trace!("{description}::\n{}\n", plan.display_indent_schema());
 }

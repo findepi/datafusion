@@ -114,12 +114,12 @@ fn extract_plan_from_distinct(plan: Arc<LogicalPlan>) -> Arc<LogicalPlan> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::analyzer::type_coercion::TypeCoercion;
-    use crate::analyzer::Analyzer;
     use crate::test::*;
     use arrow::datatypes::{DataType, Field, Schema};
     use datafusion_common::config::ConfigOptions;
     use datafusion_expr::{col, logical_plan::table_scan};
+    use datafusion_sql::analyzer::type_coercion::TypeCoercion;
+    use datafusion_sql::analyzer::Analyzer;
 
     fn schema() -> Schema {
         Schema::new(vec![

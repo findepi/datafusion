@@ -33,7 +33,6 @@ use datafusion_expr::{
     ScalarUDF, TableSource, WindowUDF,
 };
 use datafusion_functions::core::expr_ext::FieldAccessor;
-use datafusion_optimizer::analyzer::Analyzer;
 use datafusion_optimizer::optimizer::Optimizer;
 use datafusion_optimizer::simplify_expressions::GuaranteeRewriter;
 use datafusion_optimizer::{OptimizerConfig, OptimizerContext};
@@ -45,6 +44,7 @@ use datafusion_sql::TableReference;
 
 use chrono::DateTime;
 use datafusion_functions::datetime;
+use datafusion_sql::analyzer::Analyzer;
 
 #[cfg(test)]
 #[ctor::ctor]
