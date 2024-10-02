@@ -30,7 +30,6 @@
 //!
 //! [`LogicalPlan`]: datafusion_expr::LogicalPlan
 //! [`TypeCoercion`]: analyzer::type_coercion::TypeCoercion
-pub mod analyzer;
 pub mod common_subexpr_eliminate;
 pub mod decorrelate;
 pub mod decorrelate_predicate_subquery;
@@ -61,7 +60,6 @@ pub mod utils;
 #[cfg(test)]
 pub mod test;
 
-pub use analyzer::{Analyzer, AnalyzerRule};
 pub use optimizer::{Optimizer, OptimizerConfig, OptimizerContext, OptimizerRule};
 #[allow(deprecated)]
 pub use utils::optimize_children;

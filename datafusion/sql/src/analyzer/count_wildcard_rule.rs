@@ -17,11 +17,11 @@
 
 use crate::analyzer::AnalyzerRule;
 
-use crate::utils::NamePreserver;
 use datafusion_common::config::ConfigOptions;
 use datafusion_common::tree_node::{Transformed, TransformedResult, TreeNode};
 use datafusion_common::Result;
 use datafusion_expr::expr::{AggregateFunction, WindowFunction};
+use datafusion_expr::expr_rewriter::NamePreserver;
 use datafusion_expr::utils::COUNT_STAR_EXPANSION;
 use datafusion_expr::{lit, Expr, LogicalPlan, WindowFunctionDefinition};
 
@@ -101,7 +101,6 @@ fn analyze_internal(plan: LogicalPlan) -> Result<Transformed<LogicalPlan>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test::*;
     use arrow::datatypes::DataType;
     use datafusion_common::ScalarValue;
     use datafusion_expr::expr::Sort;
@@ -114,6 +113,10 @@ mod tests {
     use datafusion_functions_aggregate::expr_fn::max;
     use std::sync::Arc;
 
+    use crate::test::{
+        assert_analyzed_plan_eq_display_indent, test_table_scan,
+        test_table_scan_with_name,
+    };
     use datafusion_functions_aggregate::expr_fn::{count, sum};
 
     fn assert_plan_eq(plan: LogicalPlan, expected: &str) -> Result<()> {

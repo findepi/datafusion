@@ -100,7 +100,7 @@ use datafusion_common::ScalarValue;
 use datafusion_expr::tree_node::replace_sort_expression;
 use datafusion_expr::{Projection, SortExpr};
 use datafusion_optimizer::optimizer::ApplyOrder;
-use datafusion_optimizer::AnalyzerRule;
+use datafusion_sql::analyzer::AnalyzerRule;
 
 /// Execute the specified sql and return the resulting record batches
 /// pretty printed as a String.

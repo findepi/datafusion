@@ -106,8 +106,8 @@ mod tests {
     use std::{borrow::Cow, sync::Arc, vec};
 
     use crate::analyzer::inline_table_scan::InlineTableScan;
-    use crate::test::assert_analyzed_plan_eq;
 
+    use crate::test::assert_analyzed_plan_eq;
     use arrow::datatypes::{DataType, Field, Schema};
     use datafusion_expr::{col, lit, Expr, LogicalPlan, LogicalPlanBuilder, TableSource};
 

@@ -22,9 +22,8 @@ use datafusion_expr::{
     AggregateUDF, Expr, LogicalPlan, ScalarUDF, TableProviderFilterPushDown, TableSource,
     WindowUDF,
 };
-use datafusion_optimizer::{
-    Analyzer, AnalyzerRule, Optimizer, OptimizerConfig, OptimizerContext, OptimizerRule,
-};
+use datafusion_optimizer::{Optimizer, OptimizerConfig, OptimizerContext, OptimizerRule};
+use datafusion_sql::analyzer::{Analyzer, AnalyzerRule};
 use datafusion_sql::planner::{ContextProvider, SqlToRel};
 use datafusion_sql::sqlparser::dialect::PostgreSqlDialect;
 use datafusion_sql::sqlparser::parser::Parser;

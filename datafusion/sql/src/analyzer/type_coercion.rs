@@ -24,7 +24,6 @@ use itertools::izip;
 use arrow::datatypes::{DataType, Field, IntervalUnit, Schema};
 
 use crate::analyzer::AnalyzerRule;
-use crate::utils::NamePreserver;
 use datafusion_common::config::ConfigOptions;
 use datafusion_common::tree_node::{Transformed, TreeNode, TreeNodeRewriter};
 use datafusion_common::{
@@ -35,7 +34,7 @@ use datafusion_expr::expr::{
     self, Alias, Between, BinaryExpr, Case, Exists, InList, InSubquery, Like,
     ScalarFunction, Sort, WindowFunction,
 };
-use datafusion_expr::expr_rewriter::coerce_plan_expr_for_schema;
+use datafusion_expr::expr_rewriter::{coerce_plan_expr_for_schema, NamePreserver};
 use datafusion_expr::expr_schema::cast_subquery;
 use datafusion_expr::logical_plan::Subquery;
 use datafusion_expr::type_coercion::binary::{

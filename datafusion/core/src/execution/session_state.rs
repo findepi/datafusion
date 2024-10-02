@@ -56,13 +56,12 @@ use datafusion_expr::{
     AggregateUDF, Explain, Expr, ExprSchemable, LogicalPlan, ScalarUDF, TableSource,
     WindowUDF,
 };
-use datafusion_optimizer::{
-    Analyzer, AnalyzerRule, Optimizer, OptimizerConfig, OptimizerRule,
-};
+use datafusion_optimizer::{Optimizer, OptimizerConfig, OptimizerRule};
 use datafusion_physical_expr::create_physical_expr;
 use datafusion_physical_expr_common::physical_expr::PhysicalExpr;
 use datafusion_physical_optimizer::PhysicalOptimizerRule;
 use datafusion_physical_plan::ExecutionPlan;
+use datafusion_sql::analyzer::{Analyzer, AnalyzerRule};
 use datafusion_sql::parser::{DFParser, Statement};
 use datafusion_sql::planner::{ContextProvider, ParserOptions, PlannerContext, SqlToRel};
 use itertools::Itertools;

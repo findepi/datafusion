@@ -34,6 +34,7 @@
 //! [`LogicalPlan`]: datafusion_expr::logical_plan::LogicalPlan
 //! [`Expr`]: datafusion_expr::expr::Expr
 
+pub mod analyzer;
 mod cte;
 mod expr;
 pub mod parser;
@@ -43,6 +44,8 @@ mod relation;
 mod select;
 mod set_expr;
 mod statement;
+#[cfg(test)]
+mod test;
 #[cfg(feature = "unparser")]
 pub mod unparser;
 pub mod utils;

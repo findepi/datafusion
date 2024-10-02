@@ -17,7 +17,7 @@
 
 use std::sync::Arc;
 
-use crate::AnalyzerRule;
+use crate::analyzer::AnalyzerRule;
 use datafusion_common::config::ConfigOptions;
 use datafusion_common::tree_node::{Transformed, TransformedResult};
 use datafusion_common::{Column, Result};
@@ -160,14 +160,13 @@ fn replace_columns(
 mod tests {
     use arrow::datatypes::{DataType, Field, Schema};
 
+    use super::*;
+    use crate::analyzer::Analyzer;
     use crate::test::{assert_analyzed_plan_eq_display_indent, test_table_scan};
-    use crate::Analyzer;
     use datafusion_common::{JoinType, TableReference};
     use datafusion_expr::{
         col, in_subquery, qualified_wildcard, table_scan, wildcard, LogicalPlanBuilder,
     };
-
-    use super::*;
 
     fn assert_plan_eq(plan: LogicalPlan, expected: &str) -> Result<()> {
         assert_analyzed_plan_eq_display_indent(

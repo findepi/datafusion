@@ -17,7 +17,7 @@
 
 //! Logical Expressions: [`Expr`]
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt::{self, Display, Formatter, Write};
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -1835,6 +1835,23 @@ fn rewrite_placeholder(expr: &mut Expr, other: &Expr, schema: &DFSchema) -> Resu
         };
     }
     Ok(())
+}
+
+pub fn collect_subquery_cols(
+    exprs: &[Expr],
+    subquery_schema: &DFSchema,
+) -> Result<BTreeSet<Column>> {
+    exprs.iter().try_fold(BTreeSet::new(), |mut cols, expr| {
+        let mut using_cols: Vec<Column> = vec![];
+        for col in expr.column_refs().into_iter() {
+            if subquery_schema.has_column(col) {
+                using_cols.push(col.clone());
+            }
+        }
+
+        cols.extend(using_cols);
+        Result::<_>::Ok(cols)
+    })
 }
 
 #[macro_export]

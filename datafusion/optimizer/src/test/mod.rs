@@ -15,13 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::analyzer::{Analyzer, AnalyzerRule};
 use crate::optimizer::Optimizer;
 use crate::{OptimizerContext, OptimizerRule};
 use arrow::datatypes::{DataType, Field, Schema};
 use datafusion_common::config::ConfigOptions;
 use datafusion_common::{assert_contains, Result};
 use datafusion_expr::{col, logical_plan::table_scan, LogicalPlan, LogicalPlanBuilder};
+use datafusion_sql::analyzer::{Analyzer, AnalyzerRule};
 use std::sync::Arc;
 
 pub mod user_defined;
@@ -106,46 +106,6 @@ pub fn get_tpch_table_schema(table: &str) -> Schema {
 
         _ => unimplemented!("Table: {}", table),
     }
-}
-
-pub fn assert_analyzed_plan_eq(
-    rule: Arc<dyn AnalyzerRule + Send + Sync>,
-    plan: LogicalPlan,
-    expected: &str,
-) -> Result<()> {
-    let options = ConfigOptions::default();
-    assert_analyzed_plan_with_config_eq(options, rule, plan, expected)?;
-
-    Ok(())
-}
-
-pub fn assert_analyzed_plan_with_config_eq(
-    options: ConfigOptions,
-    rule: Arc<dyn AnalyzerRule + Send + Sync>,
-    plan: LogicalPlan,
-    expected: &str,
-) -> Result<()> {
-    let analyzed_plan =
-        Analyzer::with_rules(vec![rule]).execute_and_check(plan, &options, |_, _| {})?;
-    let formatted_plan = format!("{analyzed_plan}");
-    assert_eq!(formatted_plan, expected);
-
-    Ok(())
-}
-
-
-pub fn assert_analyzed_plan_eq_display_indent(
-    rule: Arc<dyn AnalyzerRule + Send + Sync>,
-    plan: LogicalPlan,
-    expected: &str,
-) -> Result<()> {
-    let options = ConfigOptions::default();
-    let analyzed_plan =
-        Analyzer::with_rules(vec![rule]).execute_and_check(plan, &options, |_, _| {})?;
-    let formatted_plan = analyzed_plan.display_indent_schema().to_string();
-    assert_eq!(formatted_plan, expected);
-
-    Ok(())
 }
 
 pub fn assert_analyzer_check_err(

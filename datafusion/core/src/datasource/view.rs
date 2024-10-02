@@ -19,6 +19,7 @@
 
 use std::{any::Any, borrow::Cow, sync::Arc};
 
+use crate::datasource::{TableProvider, TableType};
 use crate::{
     error::Result,
     logical_expr::{Expr, LogicalPlan},
@@ -30,10 +31,8 @@ use datafusion_catalog::Session;
 use datafusion_common::config::ConfigOptions;
 use datafusion_common::Column;
 use datafusion_expr::{LogicalPlanBuilder, TableProviderFilterPushDown};
-use datafusion_optimizer::analyzer::expand_wildcard_rule::ExpandWildcardRule;
-use datafusion_optimizer::Analyzer;
-
-use crate::datasource::{TableProvider, TableType};
+use datafusion_sql::analyzer::expand_wildcard_rule::ExpandWildcardRule;
+use datafusion_sql::analyzer::Analyzer;
 
 /// An implementation of `TableProvider` that uses another logical plan.
 #[derive(Debug)]
