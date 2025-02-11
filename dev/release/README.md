@@ -268,6 +268,8 @@ Verify that the Cargo.toml in the tarball contains the correct version
 (cd datafusion/doc && cargo publish)
 (cd datafusion/expr && cargo publish)
 (cd datafusion/macros && cargo publish)
+(cd datafusion/excalibur/lib && cargo publish)
+(cd datafusion/excalibur/macros && cargo publish)
 (cd datafusion/execution && cargo publish)
 (cd datafusion/functions && cargo publish)
 (cd datafusion/physical-expr && cargo publish)
