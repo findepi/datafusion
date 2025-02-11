@@ -1,0 +1,67 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+use crate::reader::ExArrayReader;
+use arrow::array::{ArrayRef, UInt64Array};
+use arrow::datatypes::DataType;
+use datafusion_common::cast::as_uint64_array;
+use datafusion_common::types::NativeType;
+use datafusion_common::ScalarValue;
+use datafusion_common::{DataFusionError, Result};
+use std::any::type_name;
+
+pub trait ExType {
+    type ArrayReaderType: ExArrayReader<ValueType = Self>;
+    type ScalarReaderType: ExArrayReader<ValueType = Self>;
+
+    fn logical_type() -> NativeType {
+        Self::data_type().into()
+    }
+
+    fn data_type() -> DataType;
+
+    fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType>;
+
+    fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType>;
+}
+
+impl ExType for u64 {
+    type ArrayReaderType = UInt64Array;
+    type ScalarReaderType = Option<u64>;
+
+    fn data_type() -> DataType {
+        DataType::UInt64
+    }
+
+    fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
+        Ok(as_uint64_array(&array)?
+            // shallow clone of the array
+            .clone())
+    }
+
+    fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
+        if let ScalarValue::UInt64(value) = scalar {
+            Ok(value)
+        } else {
+            Err(DataFusionError::Internal(format!(
+                "Could not cast scalar {:?} value to {}",
+                scalar,
+                type_name::<Self>()
+            )))
+        }
+    }
+}
