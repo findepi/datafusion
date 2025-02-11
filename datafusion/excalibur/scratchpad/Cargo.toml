@@ -1,0 +1,15 @@
+[package]
+name = "datafusion-excalibur-scratchpad"
+version = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[lints]
+#workspace = true
+
+[dev-dependencies]
+datafusion = { workspace = true }

@@ -1,0 +1,11 @@
+error: expected string literal
+ --> tests/ui/errs/invalid_name.rs:3:29
+  |
+3 | #[excalibur_function(name = unquoted_name)]
+  |                             ^^^^^^^^^^^^^
+
+error: expected string literal
+ --> tests/ui/errs/invalid_name.rs:9:29
+  |
+9 | #[excalibur_function(name = 123)]
+  |                             ^^^

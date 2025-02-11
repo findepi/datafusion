@@ -1,0 +1,5 @@
+error: Unknown attribute
+ --> tests/ui/errs/invalid_attribute.rs:3:22
+  |
+3 | #[excalibur_function(hallucinated_attribute = "my_function")]
+  |                      ^^^^^^^^^^^^^^^^^^^^^^
