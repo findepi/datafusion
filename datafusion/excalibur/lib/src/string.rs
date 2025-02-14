@@ -15,19 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
-
-
-
+use crate::reader::ExArrayReader;
 use crate::types::arg_type::{ExArgType, FindExArgType};
 use arrow::array::{Array, ArrayRef, StringArray};
 use datafusion_common::cast::as_string_array;
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_common::{DataFusionError, ScalarValue};
-use std::any::type_name;
 use std::ptr::NonNull;
-use crate::reader::ExArrayReader;
 
 impl FindExArgType for dyn AsRef<str> {
     type Type = ImplAsRefStr;
@@ -66,7 +61,6 @@ impl ExArgType for ImplAsRefStr {
         }
     }
 }
-
 
 // TODO implement this in terms of GenericByteArray
 
