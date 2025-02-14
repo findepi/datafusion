@@ -21,8 +21,8 @@ mod invoke;
 mod reader;
 mod scalar_udf;
 mod signature;
-mod types;
 mod string;
+mod types;
 
 // Not public API.
 #[doc(hidden)]
