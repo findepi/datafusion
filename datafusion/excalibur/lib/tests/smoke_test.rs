@@ -31,7 +31,7 @@ fn add_one(a: u64) -> u64 {
 }
 
 #[test]
-fn simple_function_signature() {
+fn test_function_signature() {
     let udf = add_one_udf();
     assert_eq!(udf.name(), "add_one");
 
@@ -47,7 +47,7 @@ fn simple_function_signature() {
 }
 
 #[test]
-fn simple_function_invoke_array() {
+fn test_invoke_array() {
     let udf = add_one_udf();
 
     let invoke_args = vec![ColumnarValue::Array(Arc::new(UInt64Array::from(vec![
@@ -71,7 +71,35 @@ fn simple_function_invoke_array() {
 }
 
 #[test]
-fn simple_function_invoke_scalar() {
+fn test_invoke_array_with_nulls() {
+    let udf = add_one_udf();
+
+    let invoke_args = vec![ColumnarValue::Array(Arc::new(UInt64Array::from(vec![
+        Some(1000),
+        None,
+        Some(3000),
+        None,
+        Some(5000),
+    ])))];
+    let ColumnarValue::Array(result_array) = udf
+        .invoke_with_args(ScalarFunctionArgs {
+            args: invoke_args,
+            number_rows: 5,
+            return_type: &DataType::UInt64,
+        })
+        .unwrap()
+    else {
+        panic!("Expected array result");
+    };
+
+    assert_eq!(
+        &*result_array,
+        &UInt64Array::from(vec![Some(1001), None, Some(3001), None, Some(5001)])
+    );
+}
+
+#[test]
+fn test_invoke_scalar() {
     let udf = add_one_udf();
 
     let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::UInt64(Some(1000)))];
@@ -87,4 +115,23 @@ fn simple_function_invoke_scalar() {
     };
 
     assert_eq!(&*result_array, &UInt64Array::from(vec![1001]));
+}
+
+#[test]
+fn test_invoke_scalar_null() {
+    let udf = add_one_udf();
+
+    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::UInt64(None))];
+    let ColumnarValue::Array(result_array) = udf
+        .invoke_with_args(ScalarFunctionArgs {
+            args: invoke_args,
+            number_rows: 1,
+            return_type: &DataType::UInt64,
+        })
+        .unwrap()
+    else {
+        panic!("Expected array result");
+    };
+
+    assert_eq!(&*result_array, &UInt64Array::from(vec![None]));
 }
