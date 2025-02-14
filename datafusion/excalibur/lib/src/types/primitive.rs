@@ -12,7 +12,6 @@ use datafusion_common::cast::{
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_common::{DataFusionError, ScalarValue};
-use std::any::type_name;
 
 macro_rules! primitive_type {
     ($native_type:ty, $dt_option_name:ident, $array_type:ty, $as_array:ident) => {
