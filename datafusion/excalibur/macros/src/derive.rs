@@ -21,7 +21,10 @@ use crate::strings::to_camel_case;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::spanned::Spanned;
-use syn::{parse_macro_input, parse_quote, token, Error, Path, PathSegment, Result, Token, TraitBoundModifier, Type, TypePath, TypeTuple};
+use syn::{
+    parse_quote, Error, Result,
+    TraitBoundModifier, Type, TypeTuple,
+};
 
 pub fn derive(attributes: EFAttributes, input: InputFnInfo) -> Result<TokenStream> {
     let orig_rust_function_name = &input.name;
@@ -156,7 +159,8 @@ fn arg_implementing_type(ty: &Type) -> Result<Type> {
                     if trait_bound.lifetimes.is_none() {
                         if let TraitBoundModifier::None = trait_bound.modifier {
                             let trait_path = &trait_bound.path;
-                            let impl_type: Type = parse_quote! {<dyn #trait_path as FindExArgType>::Type };
+                            let impl_type: Type =
+                                parse_quote! {<dyn #trait_path as FindExArgType>::Type };
                             return Ok(impl_type);
                         }
                     }
