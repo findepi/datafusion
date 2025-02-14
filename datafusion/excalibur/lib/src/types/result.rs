@@ -15,33 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::reader::ExArrayReader;
-use arrow::array::{Array, ArrowPrimitiveType, BooleanArray, PrimitiveArray};
+use arrow::datatypes::DataType;
+use crate::types::ret_type::ExRetType;
+use datafusion_common::Result;
 
-impl<T> ExArrayReader for PrimitiveArray<T>
+impl<T> ExRetType for Result<T>
 where
-    T: ArrowPrimitiveType,
+    T: ExRetType,
 {
-    type ValueType = T::Native;
-
-    fn is_valid(&self, position: usize) -> bool {
-        Array::is_valid(self, position)
-    }
-
-    fn get(&self, position: usize) -> Self::ValueType {
-        self.value(position)
-    }
-}
-
-impl ExArrayReader for BooleanArray
-{
-    type ValueType = bool;
-
-    fn is_valid(&self, position: usize) -> bool {
-        Array::is_valid(self, position)
-    }
-
-    fn get(&self, position: usize) -> Self::ValueType {
-        self.value(position)
+    fn data_type() -> DataType {
+        T::data_type()
     }
 }

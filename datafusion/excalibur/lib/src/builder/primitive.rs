@@ -16,7 +16,7 @@
 // under the License.
 
 use crate::builder::{ExArrayBuilder, ExFullResultType};
-use arrow::array::{ArrayRef, PrimitiveBuilder};
+use arrow::array::{ArrayRef, BooleanBuilder, PrimitiveBuilder};
 use arrow::datatypes::{
     ArrowPrimitiveType, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type,
     UInt32Type, UInt64Type, UInt8Type,
@@ -56,6 +56,37 @@ where
     fn get_out_arg(&mut self, _position: usize) {}
 
     fn append(&mut self, _out_arg: (), fn_ret: T::Native) -> Result<()> {
+        self.append_value(fn_ret);
+        Ok(())
+    }
+
+    fn append_null(&mut self) -> Result<()> {
+        self.append_null();
+        Ok(())
+    }
+
+    fn build(mut self) -> Result<ArrayRef> {
+        Ok(Arc::new(self.finish()))
+    }
+}
+
+impl ExFullResultType for ((), bool) {
+    type BuilderType = BooleanBuilder;
+
+    fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
+        Self::BuilderType::with_capacity(number_rows)
+    }
+}
+
+impl ExArrayBuilder for BooleanBuilder {
+    type OutArg = ();
+    type Return = bool;
+
+    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {
+        ()
+    }
+
+    fn append(&mut self, _out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
         self.append_value(fn_ret);
         Ok(())
     }

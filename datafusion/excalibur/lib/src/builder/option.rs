@@ -34,8 +34,6 @@ where
 }
 
 pub struct ResultBuilderWithOptionSupport<Delegate>
-where
-    Delegate: ExArrayBuilder,
 {
     delegate: Delegate,
 }
