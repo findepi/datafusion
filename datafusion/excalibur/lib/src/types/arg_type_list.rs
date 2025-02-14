@@ -15,8 +15,29 @@
 // specific language governing permissions and limitations
 // under the License.
 
-pub mod ret_type;
-pub mod arg_type;
-pub mod arg_type_list;
-mod primitive;
-mod option;
+use crate::types::arg_type::ExArgType;
+use datafusion_expr::TypeSignatureClass;
+use std::sync::Arc;
+
+pub trait ExArgTypeList {
+    fn type_signature() -> Vec<TypeSignatureClass>;
+}
+
+impl ExArgTypeList for () {
+    fn type_signature() -> Vec<TypeSignatureClass> {
+        vec![]
+    }
+}
+
+impl<Head, Tail> ExArgTypeList for (Head, Tail)
+where
+    Head: ExArgType,
+    Tail: ExArgTypeList,
+{
+    fn type_signature() -> Vec<TypeSignatureClass> {
+        let mut signature =
+            vec![TypeSignatureClass::Native(Arc::new(Head::logical_type()))];
+        signature.extend(Tail::type_signature());
+        signature
+    }
+}

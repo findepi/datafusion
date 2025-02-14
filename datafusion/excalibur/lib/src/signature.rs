@@ -16,17 +16,17 @@
 // under the License.
 
 use crate::bridge::ExcaliburScalarUdf;
-use crate::types::ex_type::ExType;
-use crate::types::ex_type_list::ExTypeList;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
 use datafusion_expr::{Signature, Volatility};
+use crate::types::arg_type_list::ExArgTypeList;
+use crate::types::ret_type::ExRetType;
 
 pub fn create_excalibur_signature<T>() -> ExcaliburSignature
 where
     T: ExcaliburScalarUdf,
-    T::ArgumentRustTypes: ExTypeList,
-    T::ReturnRustType: ExType,
+    T::ArgumentRustTypes: ExArgTypeList,
+    T::ReturnRustType: ExRetType,
 {
     ExcaliburSignature {
         signature: Signature::coercible(

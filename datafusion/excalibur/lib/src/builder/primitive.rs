@@ -17,7 +17,7 @@
 
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use arrow::array::{ArrayRef, PrimitiveBuilder};
-use arrow::datatypes::{ArrowPrimitiveType, Int64Type, UInt64Type};
+use arrow::datatypes::{ArrowPrimitiveType, Int64Type, UInt64Type, Int32Type, UInt32Type, Int16Type, UInt16Type, Int8Type, UInt8Type};
 use datafusion_common::Result;
 use std::sync::Arc;
 
@@ -33,7 +33,14 @@ macro_rules! primitive_result_type {
     };
 }
 
+primitive_result_type!(i8, Int8Type);
+primitive_result_type!(i16, Int16Type);
+primitive_result_type!(i32, Int32Type);
 primitive_result_type!(i64, Int64Type);
+
+primitive_result_type!(u8, UInt8Type);
+primitive_result_type!(u16, UInt16Type);
+primitive_result_type!(u32, UInt32Type);
 primitive_result_type!(u64, UInt64Type);
 
 impl<T> ExArrayBuilder for PrimitiveBuilder<T>

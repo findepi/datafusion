@@ -24,15 +24,11 @@ use datafusion_common::ScalarValue;
 use datafusion_common::{DataFusionError, Result};
 use std::any::type_name;
 
-pub trait ExType {
+pub trait ExArgType {
     type ArrayReaderType: ExArrayReader<ValueType = Self>;
     type ScalarReaderType: ExArrayReader<ValueType = Self>;
 
-    fn logical_type() -> NativeType {
-        Self::data_type().into()
-    }
-
-    fn data_type() -> DataType;
+    fn logical_type() -> NativeType;
 
     fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType>;
 

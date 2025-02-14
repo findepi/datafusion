@@ -15,29 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::types::ex_type::ExType;
-use datafusion_expr::TypeSignatureClass;
-use std::sync::Arc;
+use arrow::datatypes::DataType;
 
-pub trait ExTypeList {
-    fn type_signature() -> Vec<TypeSignatureClass>;
-}
-
-impl ExTypeList for () {
-    fn type_signature() -> Vec<TypeSignatureClass> {
-        vec![]
-    }
-}
-
-impl<Head, Tail> ExTypeList for (Head, Tail)
-where
-    Head: ExType,
-    Tail: ExTypeList,
-{
-    fn type_signature() -> Vec<TypeSignatureClass> {
-        let mut signature =
-            vec![TypeSignatureClass::Native(Arc::new(Head::logical_type()))];
-        signature.extend(Tail::type_signature());
-        signature
-    }
+pub trait ExRetType {
+    fn data_type() -> DataType;
 }

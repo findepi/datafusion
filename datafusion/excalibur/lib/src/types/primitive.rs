@@ -1,4 +1,3 @@
-use crate::types::ex_type::ExType;
 use arrow::array::{
     ArrayRef, Int16Array, Int32Array, Int64Array, Int8Array, UInt16Array, UInt32Array,
     UInt64Array, UInt8Array,
@@ -11,15 +10,18 @@ use datafusion_common::cast::{
 use datafusion_common::Result;
 use datafusion_common::{DataFusionError, ScalarValue};
 use std::any::type_name;
+use datafusion_common::types::NativeType;
+use crate::types::arg_type::ExArgType;
+use crate::types::ret_type::ExRetType;
 
 macro_rules! primitive_type {
     ($native_type:ty, $dt_option_name:ident, $array_type:ty, $as_array:ident) => {
-        impl ExType for $native_type {
+        impl ExArgType for $native_type {
             type ArrayReaderType = $array_type;
             type ScalarReaderType = Option<$native_type>;
 
-            fn data_type() -> DataType {
-                DataType::$dt_option_name
+            fn logical_type() -> NativeType {
+                DataType::$dt_option_name.into()
             }
 
             fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
@@ -38,6 +40,12 @@ macro_rules! primitive_type {
                         type_name::<Self>()
                     )))
                 }
+            }
+        }
+
+        impl ExRetType for $native_type {
+            fn data_type() -> DataType {
+                DataType::$dt_option_name
             }
         }
     };

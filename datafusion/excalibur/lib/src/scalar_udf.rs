@@ -19,8 +19,7 @@ use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::invoke::{excalibur_invoke, ApplyList};
 use crate::signature::{create_excalibur_signature, ExcaliburSignature};
-use crate::types::ex_type::ExType;
-use crate::types::ex_type_list::ExTypeList;
+use crate::types::arg_type_list::ExArgTypeList;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
 use datafusion_expr::{ColumnarValue, ScalarFunctionArgs, ScalarUDFImpl, Signature};
@@ -28,13 +27,14 @@ use std::any::Any;
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::sync::Arc;
+use crate::types::ret_type::ExRetType;
 
 pub fn create_excalibur_scalar_udf<T>() -> Arc<dyn ScalarUDFImpl>
 where
     T: ExcaliburScalarUdf + Send + Sync + 'static,
-    T::ArgumentRustTypes: ExTypeList,
+    T::ArgumentRustTypes: ExArgTypeList,
     T::ArgumentRustTypes: ApplyList,
-    T::ReturnRustType: ExType,
+    T::ReturnRustType: ExRetType,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
             OutArg = T::OutArgRustType,

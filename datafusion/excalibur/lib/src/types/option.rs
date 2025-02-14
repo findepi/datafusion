@@ -15,8 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-pub mod ret_type;
-pub mod arg_type;
-pub mod arg_type_list;
-mod primitive;
-mod option;
+use arrow::datatypes::DataType;
+use crate::types::ret_type::ExRetType;
+
+impl<T> ExRetType for Option<T>
+where T: ExRetType
+{
+    fn data_type() -> DataType {
+        T::data_type()
+    }
+}

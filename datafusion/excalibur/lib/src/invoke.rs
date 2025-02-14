@@ -18,11 +18,11 @@
 use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::ExArrayReader;
-use crate::types::ex_type::ExType;
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
 use datafusion_expr::ScalarFunctionArgs;
 use std::collections::VecDeque;
+use crate::types::arg_type::ExArgType;
 
 pub fn excalibur_invoke<T>(args: ScalarFunctionArgs) -> Result<ColumnarValue>
 where
@@ -75,7 +75,7 @@ pub trait ApplyList {
 
 impl<Head, Tail> ApplyList for (Head, Tail)
 where
-    Head: ExType,
+    Head: ExArgType,
     Tail: ApplyList,
 {
     fn apply<Builder, Valid, Invoke>(
