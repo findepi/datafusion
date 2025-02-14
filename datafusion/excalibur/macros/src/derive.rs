@@ -20,7 +20,8 @@ use crate::input::InputFnInfo;
 use crate::strings::to_camel_case;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
-use syn::{Result, Type, TypeTuple};
+use syn::spanned::Spanned;
+use syn::{parse_macro_input, parse_quote, token, Error, Path, PathSegment, Result, Token, TraitBoundModifier, Type, TypePath, TypeTuple};
 
 pub fn derive(attributes: EFAttributes, input: InputFnInfo) -> Result<TokenStream> {
     let orig_rust_function_name = &input.name;
@@ -30,7 +31,7 @@ pub fn derive(attributes: EFAttributes, input: InputFnInfo) -> Result<TokenStrea
     let imports = common_imports();
 
     let (impl_struct_name, struct_definition) =
-        struct_definition(&input, &sql_function_name);
+        struct_definition(&input, &sql_function_name)?;
 
     let function_doc = format!("Factory method for a ScalarUDFImpl based on the function [`{orig_rust_function_name}`]");
     let factory_function = quote! {
@@ -52,8 +53,9 @@ fn common_imports() -> TokenStream {
     // Imports for everything but the outermost function signature. Keep them sorted.
     let imports = quote! {
         use ::datafusion_excalibur::__private::ExcaliburScalarUdf;
-        use ::datafusion_excalibur::__private::create_excalibur_scalar_udf;
+        use ::datafusion_excalibur::__private::FindExArgType;
         use ::datafusion_excalibur::__private::ScalarUDFImpl;
+        use ::datafusion_excalibur::__private::create_excalibur_scalar_udf;
         use ::std::ops::Deref;
         use ::std::sync::Arc;
         use ::std::sync::LazyLock;
@@ -64,7 +66,7 @@ fn common_imports() -> TokenStream {
 fn struct_definition(
     input: &InputFnInfo,
     sql_function_name: &str,
-) -> (Ident, TokenStream) {
+) -> Result<(Ident, TokenStream)> {
     let orig_rust_function_name = &input.name;
     let impl_struct_name = format_ident!("{}", to_camel_case(sql_function_name));
     let rust_arg_count = input.args.len() as u8;
@@ -72,8 +74,8 @@ fn struct_definition(
         input
             .args
             .iter()
-            .map(|arg| arg.ty.to_owned())
-            .collect::<Vec<_>>(),
+            .map(|arg| arg_implementing_type(&arg.ty))
+            .collect::<Result<Vec<_>>>()?,
     );
     let rust_return_type = &input.return_ty;
 
@@ -110,7 +112,7 @@ fn struct_definition(
             }
         }
     };
-    (impl_struct_name, struct_definition)
+    Ok((impl_struct_name, struct_definition))
 }
 
 fn sql_function_name(attributes: &EFAttributes, input: &InputFnInfo) -> String {
@@ -144,4 +146,30 @@ fn new_arg_name(name: &Ident, pos: usize) -> Ident {
         ""
     };
     format_ident!("{}{}{}", base_name, sep, pos)
+}
+
+fn arg_implementing_type(ty: &Type) -> Result<Type> {
+    match ty {
+        Type::ImplTrait(impl_trait) => {
+            if impl_trait.bounds.len() == 1 {
+                if let syn::TypeParamBound::Trait(trait_bound) = &impl_trait.bounds[0] {
+                    if trait_bound.lifetimes.is_none() {
+                        if let TraitBoundModifier::None = trait_bound.modifier {
+                            let trait_path = &trait_bound.path;
+                            let impl_type: Type = parse_quote! {<dyn #trait_path as FindExArgType>::Type };
+                            return Ok(impl_type);
+                        }
+                    }
+                }
+            }
+        }
+        Type::Path(_) => {
+            return Ok(ty.to_owned());
+        }
+        _ => {}
+    }
+    Err(Error::new(
+        ty.span(),
+        "Function argument has unsupported type for use with Excalibur",
+    ))
 }

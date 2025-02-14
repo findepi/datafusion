@@ -35,9 +35,9 @@ macro_rules! primitive_type {
                     Ok(value)
                 } else {
                     Err(DataFusionError::Internal(format!(
-                        "Could not cast scalar {:?} value to {}",
+                        "Could not cast scalar {:?} value to {} scalar",
                         scalar,
-                        type_name::<Self>()
+                        stringify!($native_type)
                     )))
                 }
             }

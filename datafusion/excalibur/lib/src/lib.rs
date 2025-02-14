@@ -22,6 +22,7 @@ mod reader;
 mod scalar_udf;
 mod signature;
 mod types;
+mod string;
 
 // Not public API.
 #[doc(hidden)]
@@ -30,5 +31,6 @@ pub mod __private {
 
     pub use crate::bridge::ExcaliburScalarUdf;
     pub use crate::scalar_udf::create_excalibur_scalar_udf;
+    pub use crate::types::arg_type::FindExArgType;
     pub use datafusion_expr::ScalarUDFImpl;
 }

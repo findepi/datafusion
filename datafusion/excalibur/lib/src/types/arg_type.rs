@@ -31,3 +31,7 @@ pub trait ExArgType {
 
     fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType>;
 }
+
+pub trait FindExArgType {
+    type Type: ExArgType;
+}
