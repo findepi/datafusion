@@ -19,5 +19,5 @@ pub mod arg_type;
 pub mod arg_type_list;
 mod option;
 mod primitive;
-pub mod ret_type;
 mod result;
+pub mod ret_type;

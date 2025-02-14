@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::array::{Int32Array, Int64Array, UInt32Array, UInt64Array};
+use arrow::array::Int32Array;
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;

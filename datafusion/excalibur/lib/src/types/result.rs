@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::datatypes::DataType;
 use crate::types::ret_type::ExRetType;
+use arrow::datatypes::DataType;
 use datafusion_common::Result;
 
 impl<T> ExRetType for Result<T>

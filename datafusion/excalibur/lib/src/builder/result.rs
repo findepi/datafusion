@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::array::ArrayRef;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
+use arrow::array::ArrayRef;
 use datafusion_common::Result;
 
 impl<T> ExFullResultType for ((), Result<T>)
@@ -28,15 +28,12 @@ where
 
     fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
         Self::BuilderType {
-            delegate: <((), T) as ExFullResultType>::builder_with_capacity(
-                number_rows,
-            ),
+            delegate: <((), T) as ExFullResultType>::builder_with_capacity(number_rows),
         }
     }
 }
 
-pub struct ResultBuilderWithResultSupport<Delegate>
-{
+pub struct ResultBuilderWithResultSupport<Delegate> {
     delegate: Delegate,
 }
 
@@ -51,11 +48,7 @@ where
         self.delegate.get_out_arg(position)
     }
 
-    fn append(
-        &mut self,
-        out_arg: Self::OutArg,
-        fn_ret: Self::Return,
-    ) -> Result<()> {
+    fn append(&mut self, out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
         self.delegate.append(out_arg, fn_ret?)
     }
 

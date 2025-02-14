@@ -15,11 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::array::{BooleanArray, Int32Array, Int64Array, UInt32Array, UInt64Array};
+use arrow::array::BooleanArray;
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
-use datafusion_common::{exec_err, ScalarValue};
 use datafusion_common::Result;
+use datafusion_common::{exec_err, ScalarValue};
 use datafusion_excalibur_macros::excalibur_function;
 use datafusion_expr::{
     ColumnarValue, ScalarFunctionArgs, Signature, TypeSignatureClass, Volatility,
@@ -43,15 +43,11 @@ fn test_function_signature() {
     assert_eq!(
         udf.signature(),
         &Signature::coercible(
-            vec![
-                TypeSignatureClass::Native(Arc::new(NativeType::Boolean)),
-            ],
+            vec![TypeSignatureClass::Native(Arc::new(NativeType::Boolean)),],
             Volatility::Immutable
         )
     );
-    let return_type = udf
-        .return_type(&[DataType::Boolean])
-        .unwrap();
+    let return_type = udf.return_type(&[DataType::Boolean]).unwrap();
     assert_eq!(return_type, DataType::Boolean);
 }
 
@@ -59,9 +55,9 @@ fn test_function_signature() {
 fn test_invoke_array() {
     let udf = maybe_fail_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Array(Arc::new(BooleanArray::from(vec![false, false, false]))),
-    ];
+    let invoke_args = vec![ColumnarValue::Array(Arc::new(BooleanArray::from(vec![
+        false, false, false,
+    ])))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
@@ -73,37 +69,40 @@ fn test_invoke_array() {
         panic!("Expected array result");
     };
 
-    assert_eq!(
-        &*result_array,
-        &BooleanArray::from(vec![true, true, true])
-    );
+    assert_eq!(&*result_array, &BooleanArray::from(vec![true, true, true]));
 }
 
 #[test]
 fn test_invoke_array_fail() {
     let udf = maybe_fail_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Array(Arc::new(BooleanArray::from(vec![false, true, false]))),
-    ];
+    let invoke_args = vec![ColumnarValue::Array(Arc::new(BooleanArray::from(vec![
+        false, true, false,
+    ])))];
     let error = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 3,
             return_type: &DataType::Boolean,
         })
-        .err().unwrap();
+        .err()
+        .unwrap();
 
-    assert_eq!(error.to_string(), "Execution error: This test function just failed");
+    assert_eq!(
+        error.to_string(),
+        "Execution error: This test function just failed"
+    );
 }
 
 #[test]
 fn test_invoke_array_with_nulls() {
     let udf = maybe_fail_udf();
 
-    let invoke_args = vec![
-       ColumnarValue::Array(Arc::new(BooleanArray::from(vec![Some(false), None, Some(false)]))),
-    ];
+    let invoke_args = vec![ColumnarValue::Array(Arc::new(BooleanArray::from(vec![
+        Some(false),
+        None,
+        Some(false),
+    ])))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
@@ -125,9 +124,7 @@ fn test_invoke_array_with_nulls() {
 fn test_invoke_scalar() {
     let udf = maybe_fail_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Scalar(ScalarValue::Boolean(Some(false))),
-    ];
+    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::Boolean(Some(false)))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
@@ -146,27 +143,27 @@ fn test_invoke_scalar() {
 fn test_invoke_scalar_fail() {
     let udf = maybe_fail_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Scalar(ScalarValue::Boolean(Some(true))),
-    ];
+    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::Boolean(Some(true)))];
     let error = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 1,
             return_type: &DataType::Boolean,
         })
-        .err().unwrap();
+        .err()
+        .unwrap();
 
-    assert_eq!(error.to_string(), "Execution error: This test function just failed");
+    assert_eq!(
+        error.to_string(),
+        "Execution error: This test function just failed"
+    );
 }
 
 #[test]
 fn test_invoke_scalar_null() {
     let udf = maybe_fail_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Scalar(ScalarValue::Boolean(None)),
-    ];
+    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::Boolean(None))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,

@@ -82,9 +82,7 @@ impl ExArrayBuilder for BooleanBuilder {
     type OutArg = ();
     type Return = bool;
 
-    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {
-        ()
-    }
+    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {}
 
     fn append(&mut self, _out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
         self.append_value(fn_ret);

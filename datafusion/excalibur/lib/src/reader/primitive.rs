@@ -33,8 +33,7 @@ where
     }
 }
 
-impl ExArrayReader for BooleanArray
-{
+impl ExArrayReader for BooleanArray {
     type ValueType = bool;
 
     fn is_valid(&self, position: usize) -> bool {

@@ -1,10 +1,13 @@
 use crate::types::arg_type::ExArgType;
 use crate::types::ret_type::ExRetType;
-use arrow::array::{ArrayRef, BooleanArray, Int16Array, Int32Array, Int64Array, Int8Array, UInt16Array, UInt32Array, UInt64Array, UInt8Array};
+use arrow::array::{
+    ArrayRef, BooleanArray, Int16Array, Int32Array, Int64Array, Int8Array, UInt16Array,
+    UInt32Array, UInt64Array, UInt8Array,
+};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::{
-    as_int16_array, as_int32_array, as_int64_array, as_int8_array, as_uint16_array,
-    as_uint32_array, as_uint64_array, as_uint8_array, as_boolean_array,
+    as_boolean_array, as_int16_array, as_int32_array, as_int64_array, as_int8_array,
+    as_uint16_array, as_uint32_array, as_uint64_array, as_uint8_array,
 };
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;

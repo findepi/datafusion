@@ -16,13 +16,10 @@
 // under the License.
 
 use crate::reader::ExArrayReader;
-use arrow::array::{ArrayRef, UInt64Array};
-use arrow::datatypes::DataType;
-use datafusion_common::cast::as_uint64_array;
+use arrow::array::ArrayRef;
 use datafusion_common::types::NativeType;
+use datafusion_common::Result;
 use datafusion_common::ScalarValue;
-use datafusion_common::{DataFusionError, Result};
-use std::any::type_name;
 
 pub trait ExArgType {
     type ArrayReaderType: ExArrayReader<ValueType = Self>;

@@ -33,8 +33,7 @@ where
     }
 }
 
-pub struct ResultBuilderWithOptionSupport<Delegate>
-{
+pub struct ResultBuilderWithOptionSupport<Delegate> {
     delegate: Delegate,
 }
 
@@ -50,10 +49,10 @@ where
     }
 
     fn append(&mut self, out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
-        if fn_ret.is_some() {
-            self.delegate.append(out_arg, fn_ret.unwrap())
+        if let Some(ret) = fn_ret {
+            self.delegate.append(out_arg, ret)
         } else {
-            self.append_null()
+            self.delegate.append_null()
         }
     }
 
