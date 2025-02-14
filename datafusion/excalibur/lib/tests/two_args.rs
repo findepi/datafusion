@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::array::UInt64Array;
+use arrow::array::{Int32Array, Int64Array, UInt32Array, UInt64Array};
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
@@ -45,7 +45,9 @@ fn test_function_signature() {
             Volatility::Immutable
         )
     );
-    let return_type = udf.return_type(&[DataType::Int32, DataType::UInt32]).unwrap();
+    let return_type = udf
+        .return_type(&[DataType::Int32, DataType::UInt32])
+        .unwrap();
     assert_eq!(return_type, DataType::Int64);
 }
 
@@ -54,14 +56,14 @@ fn test_invoke_array() {
     let udf = add_udf();
 
     let invoke_args = vec![
-        ColumnarValue::Array(Arc::new(UInt64Array::from(vec![1000, 2000, 3000, 4000, 5000]))),
-        ColumnarValue::Array(Arc::new(UInt64Array::from(vec![1000, 2000, 3000, 4000, 5000]))),
+        ColumnarValue::Array(Arc::new(Int32Array::from(vec![1000, 2, 3000, -4, 5000]))),
+        ColumnarValue::Array(Arc::new(UInt32Array::from(vec![5, 111, 3000, 0, 13]))),
     ];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 5,
-            return_type: &DataType::UInt64,
+            return_type: &DataType::Int64,
         })
         .unwrap()
     else {
@@ -70,7 +72,7 @@ fn test_invoke_array() {
 
     assert_eq!(
         &*result_array,
-        &UInt64Array::from(vec![1001, 2001, 3001, 4001, 5001])
+        &Int64Array::from(vec![1005, 113, 6000, -4, 5013])
     );
 }
 
@@ -78,18 +80,27 @@ fn test_invoke_array() {
 fn test_invoke_array_with_nulls() {
     let udf = add_udf();
 
-    let invoke_args = vec![ColumnarValue::Array(Arc::new(UInt64Array::from(vec![
-        Some(1000),
-        None,
-        Some(3000),
-        None,
-        Some(5000),
-    ])))];
+    let invoke_args = vec![
+        ColumnarValue::Array(Arc::new(Int32Array::from(vec![
+            None,
+            Some(2),
+            Some(3000),
+            Some(-4),
+            Some(5000),
+        ]))),
+        ColumnarValue::Array(Arc::new(UInt32Array::from(vec![
+            Some(5),
+            Some(111),
+            None,
+            Some(0),
+            Some(13),
+        ]))),
+    ];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 5,
-            return_type: &DataType::UInt64,
+            return_type: &DataType::Int64,
         })
         .unwrap()
     else {
@@ -98,7 +109,7 @@ fn test_invoke_array_with_nulls() {
 
     assert_eq!(
         &*result_array,
-        &UInt64Array::from(vec![Some(1001), None, Some(3001), None, Some(5001)])
+        &Int64Array::from(vec![None, Some(113), None, Some(-4), Some(5013)])
     );
 }
 
@@ -106,36 +117,42 @@ fn test_invoke_array_with_nulls() {
 fn test_invoke_scalar() {
     let udf = add_udf();
 
-    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::UInt64(Some(1000)))];
+    let invoke_args = vec![
+        ColumnarValue::Scalar(ScalarValue::Int32(Some(-3))),
+        ColumnarValue::Scalar(ScalarValue::UInt32(Some(55))),
+    ];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 1,
-            return_type: &DataType::UInt64,
+            return_type: &DataType::Int64,
         })
         .unwrap()
     else {
         panic!("Expected array result");
     };
 
-    assert_eq!(&*result_array, &UInt64Array::from(vec![1001]));
+    assert_eq!(&*result_array, &Int64Array::from(vec![52]));
 }
 
 #[test]
 fn test_invoke_scalar_null() {
     let udf = add_udf();
 
-    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::UInt64(None))];
+    let invoke_args = vec![
+        ColumnarValue::Scalar(ScalarValue::Int32(Some(-3))),
+        ColumnarValue::Scalar(ScalarValue::UInt32(None)),
+    ];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 1,
-            return_type: &DataType::UInt64,
+            return_type: &DataType::Int64,
         })
         .unwrap()
     else {
         panic!("Expected array result");
     };
 
-    assert_eq!(&*result_array, &UInt64Array::from(vec![None]));
+    assert_eq!(&*result_array, &Int64Array::from(vec![None]));
 }
