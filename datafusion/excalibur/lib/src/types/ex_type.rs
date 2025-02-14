@@ -38,30 +38,3 @@ pub trait ExType {
 
     fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType>;
 }
-
-impl ExType for u64 {
-    type ArrayReaderType = UInt64Array;
-    type ScalarReaderType = Option<u64>;
-
-    fn data_type() -> DataType {
-        DataType::UInt64
-    }
-
-    fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
-        Ok(as_uint64_array(&array)?
-            // shallow clone of the array
-            .clone())
-    }
-
-    fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
-        if let ScalarValue::UInt64(value) = scalar {
-            Ok(value)
-        } else {
-            Err(DataFusionError::Internal(format!(
-                "Could not cast scalar {:?} value to {}",
-                scalar,
-                type_name::<Self>()
-            )))
-        }
-    }
-}
