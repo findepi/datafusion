@@ -81,11 +81,11 @@ pub struct ScalarString(Option<String>);
 impl ExArrayReader for ScalarString {
     type ValueType = ImplAsRefStr;
 
-    fn is_valid(&self, position: usize) -> bool {
+    fn is_valid(&self, _position: usize) -> bool {
         self.0.is_some()
     }
 
-    fn get(&self, position: usize) -> Self::ValueType {
+    fn get(&self, _position: usize) -> Self::ValueType {
         ImplAsRefStr(self.0.as_deref().unwrap().into())
     }
 }
