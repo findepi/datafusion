@@ -17,7 +17,10 @@
 
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use arrow::array::{ArrayRef, PrimitiveBuilder};
-use arrow::datatypes::{ArrowPrimitiveType, Int64Type, UInt64Type, Int32Type, UInt32Type, Int16Type, UInt16Type, Int8Type, UInt8Type};
+use arrow::datatypes::{
+    ArrowPrimitiveType, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type,
+    UInt32Type, UInt64Type, UInt8Type,
+};
 use datafusion_common::Result;
 use std::sync::Arc;
 

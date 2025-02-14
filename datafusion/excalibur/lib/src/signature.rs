@@ -16,11 +16,11 @@
 // under the License.
 
 use crate::bridge::ExcaliburScalarUdf;
+use crate::types::arg_type_list::ExArgTypeList;
+use crate::types::ret_type::ExRetType;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
 use datafusion_expr::{Signature, Volatility};
-use crate::types::arg_type_list::ExArgTypeList;
-use crate::types::ret_type::ExRetType;
 
 pub fn create_excalibur_signature<T>() -> ExcaliburSignature
 where

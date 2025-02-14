@@ -15,11 +15,66 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::datatypes::DataType;
+use crate::reader::ExArrayReader;
+use crate::types::arg_type::ExArgType;
 use crate::types::ret_type::ExRetType;
+use arrow::array::ArrayRef;
+use arrow::datatypes::DataType;
+use datafusion_common::types::NativeType;
+use datafusion_common::ScalarValue;
+
+impl<T> ExArgType for Option<T>
+where
+    T: ExArgType,
+{
+    type ArrayReaderType = NullableReader<T::ArrayReaderType>;
+    type ScalarReaderType = NullableReader<T::ScalarReaderType>;
+
+    fn logical_type() -> NativeType {
+        T::logical_type()
+    }
+
+    fn read_array(array: ArrayRef) -> datafusion_common::Result<Self::ArrayReaderType> {
+        Ok(NullableReader {
+            delegate: T::read_array(array)?,
+        })
+    }
+
+    fn read_scalar(
+        scalar: ScalarValue,
+    ) -> datafusion_common::Result<Self::ScalarReaderType> {
+        Ok(NullableReader {
+            delegate: T::read_scalar(scalar)?,
+        })
+    }
+}
+
+pub struct NullableReader<Delegate> {
+    delegate: Delegate,
+}
+
+impl<Delegate> ExArrayReader for NullableReader<Delegate>
+where
+    Delegate: ExArrayReader,
+{
+    type ValueType = Option<Delegate::ValueType>;
+
+    fn is_valid(&self, _position: usize) -> bool {
+        true
+    }
+
+    fn get(&self, position: usize) -> Self::ValueType {
+        if self.delegate.is_valid(position) {
+            Some(self.delegate.get(position))
+        } else {
+            None
+        }
+    }
+}
 
 impl<T> ExRetType for Option<T>
-where T: ExRetType
+where
+    T: ExRetType,
 {
     fn data_type() -> DataType {
         T::data_type()

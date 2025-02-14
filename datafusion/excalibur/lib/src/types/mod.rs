@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-pub mod ret_type;
 pub mod arg_type;
 pub mod arg_type_list;
-mod primitive;
 mod option;
+mod primitive;
+pub mod ret_type;

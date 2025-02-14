@@ -18,11 +18,11 @@
 use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::ExArrayReader;
+use crate::types::arg_type::ExArgType;
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
 use datafusion_expr::ScalarFunctionArgs;
 use std::collections::VecDeque;
-use crate::types::arg_type::ExArgType;
 
 pub fn excalibur_invoke<T>(args: ScalarFunctionArgs) -> Result<ColumnarValue>
 where

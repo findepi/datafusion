@@ -26,18 +26,14 @@ use datafusion_expr::{
 use std::sync::Arc;
 
 #[excalibur_function]
-fn try_div(a: i32, b: i32) -> Option<i32> {
-    if b == 0 {
-        None
-    } else {
-        Some(a / b)
-    }
+fn first_non_null(a: Option<i32>, b: Option<i32>) -> Option<i32> {
+    a.or(b)
 }
 
 #[test]
 fn test_function_signature() {
-    let udf = try_div_udf();
-    assert_eq!(udf.name(), "try_div");
+    let udf = first_non_null_udf();
+    assert_eq!(udf.name(), "first_non_null");
 
     assert_eq!(
         udf.signature(),
@@ -57,7 +53,7 @@ fn test_function_signature() {
 
 #[test]
 fn test_invoke_array() {
-    let udf = try_div_udf();
+    let udf = first_non_null_udf();
 
     let invoke_args = vec![
         ColumnarValue::Array(Arc::new(Int32Array::from(vec![0, 3, 15, 0, 3, 60]))),
@@ -74,15 +70,12 @@ fn test_invoke_array() {
         panic!("Expected array result");
     };
 
-    assert_eq!(
-        &*result_array,
-        &Int32Array::from(vec![Some(0), Some(1), Some(5), None, None, Some(4)])
-    );
+    assert_eq!(&*result_array, &Int32Array::from(vec![0, 3, 15, 0, 3, 60]));
 }
 
 #[test]
 fn test_invoke_array_with_nulls() {
-    let udf = try_div_udf();
+    let udf = first_non_null_udf();
 
     let invoke_args = vec![
         ColumnarValue::Array(Arc::new(Int32Array::from(vec![
@@ -90,7 +83,7 @@ fn test_invoke_array_with_nulls() {
             None,
             Some(15),
             Some(0),
-            Some(3),
+            None,
             Some(60),
         ]))),
         ColumnarValue::Array(Arc::new(Int32Array::from(vec![
@@ -98,7 +91,7 @@ fn test_invoke_array_with_nulls() {
             Some(3),
             None,
             Some(0),
-            Some(0),
+            None,
             Some(15),
         ]))),
     ];
@@ -115,13 +108,13 @@ fn test_invoke_array_with_nulls() {
 
     assert_eq!(
         &*result_array,
-        &Int32Array::from(vec![Some(0), None, None, None, None, Some(4)])
+        &Int32Array::from(vec![Some(0), Some(3), Some(15), Some(0), None, Some(60)])
     );
 }
 
 #[test]
 fn test_invoke_scalar() {
-    let udf = try_div_udf();
+    let udf = first_non_null_udf();
 
     let invoke_args = vec![
         ColumnarValue::Scalar(ScalarValue::Int32(Some(33))),
@@ -138,15 +131,15 @@ fn test_invoke_scalar() {
         panic!("Expected array result");
     };
 
-    assert_eq!(&*result_array, &Int32Array::from(vec![None]));
+    assert_eq!(&*result_array, &Int32Array::from(vec![Some(33)]));
 }
 
 #[test]
 fn test_invoke_scalar_null() {
-    let udf = try_div_udf();
+    let udf = first_non_null_udf();
 
     let invoke_args = vec![
-        ColumnarValue::Scalar(ScalarValue::Int32(Some(-3))),
+        ColumnarValue::Scalar(ScalarValue::Int32(None)),
         ColumnarValue::Scalar(ScalarValue::Int32(None)),
     ];
     let ColumnarValue::Array(result_array) = udf

@@ -1,3 +1,5 @@
+use crate::types::arg_type::ExArgType;
+use crate::types::ret_type::ExRetType;
 use arrow::array::{
     ArrayRef, Int16Array, Int32Array, Int64Array, Int8Array, UInt16Array, UInt32Array,
     UInt64Array, UInt8Array,
@@ -7,12 +9,10 @@ use datafusion_common::cast::{
     as_int16_array, as_int32_array, as_int64_array, as_int8_array, as_uint16_array,
     as_uint32_array, as_uint64_array, as_uint8_array,
 };
+use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_common::{DataFusionError, ScalarValue};
 use std::any::type_name;
-use datafusion_common::types::NativeType;
-use crate::types::arg_type::ExArgType;
-use crate::types::ret_type::ExRetType;
 
 macro_rules! primitive_type {
     ($native_type:ty, $dt_option_name:ident, $array_type:ty, $as_array:ident) => {
