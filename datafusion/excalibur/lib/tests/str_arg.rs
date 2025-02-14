@@ -15,8 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::ptr::NonNull;
-use arrow::array::{Int32Array, StringArray, UInt64Array};
+use arrow::array::{StringArray, UInt64Array};
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
@@ -39,15 +38,11 @@ fn test_function_signature() {
     assert_eq!(
         udf.signature(),
         &Signature::coercible(
-            vec![
-                TypeSignatureClass::Native(Arc::new(NativeType::String)),
-            ],
+            vec![TypeSignatureClass::Native(Arc::new(NativeType::String)),],
             Volatility::Immutable
         )
     );
-    let return_type = udf
-        .return_type(&[DataType::Utf8])
-        .unwrap();
+    let return_type = udf.return_type(&[DataType::Utf8]).unwrap();
     assert_eq!(return_type, DataType::UInt64);
 }
 
@@ -55,9 +50,11 @@ fn test_function_signature() {
 fn test_invoke_array() {
     let udf = character_length_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Array(Arc::new(StringArray::from(vec!["", "abc", "Idę piękną łąką pod Warszawą"])))
-    ];
+    let invoke_args = vec![ColumnarValue::Array(Arc::new(StringArray::from(vec![
+        "",
+        "abc",
+        "Idę piękną łąką pod Warszawą",
+    ])))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
@@ -76,9 +73,11 @@ fn test_invoke_array() {
 fn test_invoke_array_with_nulls() {
     let udf = character_length_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Array(Arc::new(StringArray::from(vec![Some(""), None, Some("Idę piękną łąką pod Warszawą")])))
-    ];
+    let invoke_args = vec![ColumnarValue::Array(Arc::new(StringArray::from(vec![
+        Some(""),
+        None,
+        Some("Idę piękną łąką pod Warszawą"),
+    ])))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
@@ -100,9 +99,9 @@ fn test_invoke_array_with_nulls() {
 fn test_invoke_scalar() {
     let udf = character_length_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Scalar(ScalarValue::Utf8(Some("Idę piękną łąką pod Warszawą".to_string()))),
-    ];
+    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::Utf8(Some(
+        "Idę piękną łąką pod Warszawą".to_string(),
+    )))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
@@ -121,9 +120,7 @@ fn test_invoke_scalar() {
 fn test_invoke_scalar_null() {
     let udf = character_length_udf();
 
-    let invoke_args = vec![
-        ColumnarValue::Scalar(ScalarValue::Utf8(None)),
-    ];
+    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::Utf8(None))];
     let ColumnarValue::Array(result_array) = udf
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
