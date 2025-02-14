@@ -15,15 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::array::{Int32Array, StringBuilder};
-use arrow::datatypes::DataType;
-use datafusion_common::types::NativeType;
-use datafusion_common::ScalarValue;
-use datafusion_excalibur_macros::excalibur_function;
-use datafusion_expr::{
-    ColumnarValue, ScalarFunctionArgs, Signature, TypeSignatureClass, Volatility,
-};
-use std::sync::Arc;
 
 // #[excalibur_function]
 // fn concat(a: &str, b: &str, output: &mut impl std::fmt::Write) -> () {
