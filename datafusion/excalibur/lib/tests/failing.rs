@@ -89,7 +89,7 @@ fn test_invoke_array_fail() {
         .unwrap();
 
     assert_eq!(
-        error.to_string(),
+        error.strip_backtrace(),
         "Execution error: This test function just failed"
     );
 }
@@ -154,7 +154,7 @@ fn test_invoke_scalar_fail() {
         .unwrap();
 
     assert_eq!(
-        error.to_string(),
+        error.strip_backtrace(),
         "Execution error: This test function just failed"
     );
 }
