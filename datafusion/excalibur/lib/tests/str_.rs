@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 // #[excalibur_function]
 // fn concat(a: &str, b: &str, output: &mut impl std::fmt::Write) -> () {
 // }
