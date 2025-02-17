@@ -31,10 +31,7 @@ macro_rules! primitive_type {
                 use datafusion_common::ScalarValue;
                 match arg {
                     Array(array) => {
-                        let cast_array = $as_array(&array)?
-                            // shallow clone of the array
-                            .clone();
-                        consumer.consume(cast_array)
+                        consumer.consume($as_array(&array)?)
                     }
                     Scalar(scalar) => {
                         if let ScalarValue::$dt_option_name(value) = scalar {
