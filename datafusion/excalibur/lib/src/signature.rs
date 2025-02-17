@@ -22,10 +22,10 @@ use arrow::datatypes::DataType;
 use datafusion_common::Result;
 use datafusion_expr::{Signature, Volatility};
 
-pub fn create_excalibur_signature<T>() -> ExcaliburSignature
+pub fn create_excalibur_signature<'call, T>() -> ExcaliburSignature
 where
     T: ExcaliburScalarUdf,
-    T::ArgumentRustTypes: ExArgTypeList,
+    T::ArgumentRustTypes<'call>: ExArgTypeList,
     T::ReturnRustType: ExRetType,
 {
     ExcaliburSignature {

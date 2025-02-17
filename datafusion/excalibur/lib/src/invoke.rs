@@ -24,10 +24,10 @@ use datafusion_expr::ColumnarValue;
 use datafusion_expr::ScalarFunctionArgs;
 use std::collections::VecDeque;
 
-pub fn excalibur_invoke<T>(args: ScalarFunctionArgs) -> Result<ColumnarValue>
+pub fn excalibur_invoke<'call, T>(args: ScalarFunctionArgs) -> Result<ColumnarValue>
 where
     T: ExcaliburScalarUdf,
-    T::ArgumentRustTypes: ApplyList,
+    T::ArgumentRustTypes<'call>: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
             OutArg = T::OutArgRustType,

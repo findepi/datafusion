@@ -31,7 +31,7 @@ pub trait ExcaliburScalarUdf {
     // - (i32, (u64, ()) for my_function(a: i32, b: u64)
     // - (i32, (u64, ()) for my_function(a: i32, b: u64, out: &mut X)
     // excludes the out arg
-    type ArgumentRustTypes;
+    type ArgumentRustTypes<'call>;
 
     // T for `&mut T` passed to the function or () is there is no out argument
     type OutArgRustType;
@@ -40,7 +40,26 @@ pub trait ExcaliburScalarUdf {
     type ReturnRustType;
 
     fn invoke(
-        regular_args: Self::ArgumentRustTypes,
+        regular_args: Self::ArgumentRustTypes<'_>,
         out_arg: &mut Self::OutArgRustType,
     ) -> Self::ReturnRustType;
+}
+
+struct FooBar;
+
+impl ExcaliburScalarUdf for FooBar {
+    const SQL_NAME: &'static str = "foo_bar";
+    const RUST_ARGUMENT_COUNT: u8 = 2;
+    const SQL_ARGUMENT_COUNT: u8 = 2;
+    type ArgumentRustTypes<'call> = (i32, (u64, ()));
+    type OutArgRustType = ();
+    type ReturnRustType = i32;
+
+    fn invoke(
+        regular_args: Self::ArgumentRustTypes<'_>,
+        out_arg: &mut Self::OutArgRustType,
+    ) -> Self::ReturnRustType {
+        let (a, (b, ())) = regular_args;
+        a + b as i32
+    }
 }

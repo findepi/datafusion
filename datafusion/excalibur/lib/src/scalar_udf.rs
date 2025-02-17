@@ -29,11 +29,11 @@ use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::sync::Arc;
 
-pub fn create_excalibur_scalar_udf<T>() -> Arc<dyn ScalarUDFImpl>
+pub fn create_excalibur_scalar_udf<'call, T>() -> Arc<dyn ScalarUDFImpl>
 where
     T: ExcaliburScalarUdf + Send + Sync + 'static,
-    T::ArgumentRustTypes: ExArgTypeList,
-    T::ArgumentRustTypes: ApplyList,
+    T::ArgumentRustTypes<'call>: ExArgTypeList,
+    T::ArgumentRustTypes<'call>: ApplyList,
     T::ReturnRustType: ExRetType,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
@@ -62,10 +62,10 @@ where
     }
 }
 
-impl<T> ScalarUDFImpl for ExcaliburScalarUdfImpl<T>
+impl<'call, T> ScalarUDFImpl for ExcaliburScalarUdfImpl<T>
 where
     T: ExcaliburScalarUdf + Send + Sync + 'static,
-    T::ArgumentRustTypes: ApplyList,
+    T::ArgumentRustTypes<'call>: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
             OutArg = T::OutArgRustType,
