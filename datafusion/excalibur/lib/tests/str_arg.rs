@@ -26,36 +26,6 @@ use datafusion_expr::{
 use std::sync::Arc;
 
 #[excalibur_function]
-//
-// #[doc = "Factory method for a ScalarUDFImpl based on the function [`character_length`]"]
-// #[allow(unused_qualifications)]
-// #[automatically_derived]
-// pub fn character_length_udf() -> ::std::sync::Arc<dyn ::datafusion_excalibur::__private::ScalarUDFImpl> {
-//     use ::datafusion_excalibur::__private::ExcaliburScalarUdf;
-//     use ::datafusion_excalibur::__private::FindExArgType;
-//     use ::datafusion_excalibur::__private::ScalarUDFImpl;
-//     use ::datafusion_excalibur::__private::create_excalibur_scalar_udf;
-//     use ::std::ops::Deref;
-//     use ::std::sync::Arc;
-//     use ::std::sync::LazyLock;
-//     struct CharacterLength {}
-//     impl ExcaliburScalarUdf for CharacterLength {
-//         const SQL_NAME: &'static str = "character_length";
-//         const RUST_ARGUMENT_COUNT: u8 = 1u8;
-//         const SQL_ARGUMENT_COUNT: u8 = 1u8;
-//         // type ArgumentRustTypes = (<dyn AsRef<str> as FindExArgType>::Type, ());
-//         type ArgumentRustTypes<'call> = (&'call str, ());
-//         type OutArgRustType = ();
-//         type ReturnRustType = u64;
-//         fn invoke(regular_args: Self::ArgumentRustTypes<'_>, out_arg: &mut Self::OutArgRustType) -> Self::ReturnRustType {
-//             let (s0, ()) = regular_args;
-//             character_length(s0)
-//         }
-//     }
-//     static INSTANCE: LazyLock<Arc<dyn ScalarUDFImpl>> = LazyLock::new(|| create_excalibur_scalar_udf::<CharacterLength>());
-//     Arc::clone(INSTANCE.deref())
-// }
-
 fn character_length(s: impl AsRef<str>) -> u64 {
     s.as_ref().chars().count() as u64
 }
