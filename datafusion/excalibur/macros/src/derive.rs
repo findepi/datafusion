@@ -16,11 +16,12 @@
 // under the License.
 
 use crate::attr::EFAttributes;
-use crate::input::InputFnInfo;
+use crate::input::{InputFnInfo, NameType};
 use crate::strings::to_camel_case;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::spanned::Spanned;
+use syn::token::Token;
 use syn::{parse_quote, Error, Result, TraitBoundModifier, Type, TypeTuple};
 
 pub fn derive(attributes: EFAttributes, input: InputFnInfo) -> Result<TokenStream> {
@@ -77,13 +78,12 @@ fn struct_definition(
                 quote! { () },
                 quote! {},
             ),
-            |(type_list, destruct_args, invoke), (pos, arg)| -> Result<_> {
-                let impl_type = arg_implementing_type(&arg.ty)?;
-                let arg = new_arg_name(&arg.name, pos);
+            |(type_list, destruct_args, invoke_args), (pos, arg)| -> Result<_> {
+                let (impl_type, destruct, invoke) = implement_arg(arg)?;
                 Ok((
                     force_type::<Type>(parse_quote! { (#impl_type, #type_list) }),
-                    quote! { (#arg, #destruct_args) },
-                    quote! { #arg, #invoke },
+                    quote! { (#destruct, #destruct_args) },
+                    quote! { #invoke, #invoke_args },
                 ))
             },
         )?;
@@ -131,7 +131,9 @@ fn new_arg_name(name: &Ident, pos: usize) -> Ident {
     format_ident!("{}{}{}", base_name, sep, pos)
 }
 
-fn arg_implementing_type(ty: &Type) -> Result<Type> {
+fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
+    let ty = &arg.ty;
+    let arg_name = &arg.name;
     match ty {
         Type::ImplTrait(impl_trait) => {
             if impl_trait.bounds.len() == 1 {
@@ -141,14 +143,18 @@ fn arg_implementing_type(ty: &Type) -> Result<Type> {
                             let trait_path = &trait_bound.path;
                             let impl_type: Type =
                                 parse_quote! {<dyn #trait_path as FindExArgType>::Type };
-                            return Ok(impl_type);
+                            return Ok((
+                                impl_type,
+                                quote! { #arg_name },
+                                quote! { #arg_name },
+                            ));
                         }
                     }
                 }
             }
         }
         Type::Path(_) => {
-            return Ok(ty.to_owned());
+            return Ok((ty.to_owned(), quote! { #arg_name }, quote! { #arg_name }));
         }
         _ => {}
     }
