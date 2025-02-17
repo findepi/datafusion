@@ -23,8 +23,8 @@ use datafusion_common::cast::{
     as_uint16_array, as_uint32_array, as_uint64_array, as_uint8_array,
 };
 use datafusion_common::types::NativeType;
-use datafusion_common::Result;
-use datafusion_common::{DataFusionError, ScalarValue};
+use datafusion_common::ScalarValue;
+use datafusion_common::{internal_err, Result};
 use datafusion_expr::ColumnarValue;
 
 macro_rules! primitive_type {
@@ -49,11 +49,11 @@ macro_rules! primitive_type {
                         if let ScalarValue::$dt_option_name(value) = scalar {
                             consumer.consume(value)
                         } else {
-                            Err(DataFusionError::Internal(format!(
-                                "Could not cast scalar {:?} value to {} scalar",
-                                scalar,
-                                stringify!($native_type)
-                            )))
+                            internal_err!(
+                                "Expected {} scalar, got: {:?}",
+                                stringify!($native_type),
+                                scalar
+                            )
                         }
                     }
                 }

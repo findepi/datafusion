@@ -21,8 +21,8 @@ use arrow::array::{Array, StringArray, StringViewArray};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::{as_string_array, as_string_view_array};
 use datafusion_common::types::NativeType;
+use datafusion_common::ScalarValue;
 use datafusion_common::{internal_err, Result};
-use datafusion_common::{DataFusionError, ScalarValue};
 use datafusion_expr::ColumnarValue;
 use std::ptr::NonNull;
 

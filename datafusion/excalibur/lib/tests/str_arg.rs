@@ -19,7 +19,6 @@ use arrow::array::{StringArray, StringViewArray, UInt64Array};
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
-use datafusion_common::Result;
 use datafusion_excalibur_macros::excalibur_function;
 use datafusion_expr::{
     ColumnarValue, ScalarFunctionArgs, Signature, TypeSignatureClass, Volatility,
