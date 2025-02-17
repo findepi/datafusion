@@ -29,15 +29,15 @@ pub trait ExArgType {
     ) -> Result<()>;
 }
 
-pub type FindExArgType<T> = <T as ExFindImplementation>::Type;
+pub type FindExArgType<'a, T> = <T as ExFindImplementation>::Type<'a>;
 
 pub trait ExFindImplementation {
-    type Type: ExArgType;
+    type Type<'a>: ExArgType;
 }
 
 impl<T> ExFindImplementation for T
 where
     T: ExArgType,
 {
-    type Type = T;
+    type Type<'a> = T;
 }
