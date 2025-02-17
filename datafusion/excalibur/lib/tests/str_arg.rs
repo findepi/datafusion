@@ -15,10 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use arrow::array::{StringArray, UInt64Array};
+use arrow::array::{StringArray, StringViewArray, UInt64Array};
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
+use datafusion_common::Result;
 use datafusion_excalibur_macros::excalibur_function;
 use datafusion_expr::{
     ColumnarValue, ScalarFunctionArgs, Signature, TypeSignatureClass, Volatility,
@@ -47,10 +48,33 @@ fn test_function_signature() {
 }
 
 #[test]
-fn test_invoke_array() {
+fn test_invoke_string_array() {
     let udf = character_length_udf();
 
     let invoke_args = vec![ColumnarValue::Array(Arc::new(StringArray::from(vec![
+        "",
+        "abc",
+        "Idę piękną łąką pod Warszawą",
+    ])))];
+    let ColumnarValue::Array(result_array) = udf
+        .invoke_with_args(ScalarFunctionArgs {
+            args: invoke_args,
+            number_rows: 3,
+            return_type: &DataType::Utf8,
+        })
+        .unwrap()
+    else {
+        panic!("Expected array result");
+    };
+
+    assert_eq!(&*result_array, &UInt64Array::from(vec![0, 3, 28]));
+}
+
+#[test]
+fn test_invoke_string_view_array() {
+    let udf = character_length_udf();
+
+    let invoke_args = vec![ColumnarValue::Array(Arc::new(StringViewArray::from(vec![
         "",
         "abc",
         "Idę piękną łąką pod Warszawą",
@@ -96,10 +120,31 @@ fn test_invoke_array_with_nulls() {
 }
 
 #[test]
-fn test_invoke_scalar() {
+fn test_invoke_scalar_utf8() {
     let udf = character_length_udf();
 
     let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::Utf8(Some(
+        "Idę piękną łąką pod Warszawą".to_string(),
+    )))];
+    let ColumnarValue::Array(result_array) = udf
+        .invoke_with_args(ScalarFunctionArgs {
+            args: invoke_args,
+            number_rows: 1,
+            return_type: &DataType::Utf8,
+        })
+        .unwrap()
+    else {
+        panic!("Expected array result");
+    };
+
+    assert_eq!(&*result_array, &UInt64Array::from(vec![Some(28)]));
+}
+
+#[test]
+fn test_invoke_scalar_utf8view() {
+    let udf = character_length_udf();
+
+    let invoke_args = vec![ColumnarValue::Scalar(ScalarValue::Utf8View(Some(
         "Idę piękną łąką pod Warszawą".to_string(),
     )))];
     let ColumnarValue::Array(result_array) = udf

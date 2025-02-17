@@ -17,10 +17,11 @@
 
 use crate::reader::ExArrayReader;
 use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer, FindExArgType};
-use arrow::array::{Array, StringArray};
-use datafusion_common::cast::as_string_array;
+use arrow::array::{Array, StringArray, StringViewArray};
+use arrow::datatypes::DataType;
+use datafusion_common::cast::{as_string_array, as_string_view_array};
 use datafusion_common::types::NativeType;
-use datafusion_common::Result;
+use datafusion_common::{internal_err, Result};
 use datafusion_common::{DataFusionError, ScalarValue};
 use datafusion_expr::ColumnarValue;
 use std::ptr::NonNull;
@@ -47,21 +48,21 @@ impl ExArgType for ImplAsRefStr {
         consumer: impl ExArrayReaderConsumer<ValueType = Self>,
     ) -> Result<()> {
         match arg {
-            ColumnarValue::Array(array) => {
-                let string_array = as_string_array(&array)?
-                    // shallow clone of the array
-                    .clone();
-                consumer.consume(string_array)
+            ColumnarValue::Array(array) => match array.data_type() {
+                DataType::Utf8 => consumer.consume(as_string_array(&array)?),
+                DataType::Utf8View => consumer.consume(as_string_view_array(&array)?),
+                dt => internal_err!("Expected string array, got {:?}", dt),
+            },
+
+            ColumnarValue::Scalar(ScalarValue::Utf8(value)) => {
+                consumer.consume(ScalarString(value))
             }
+            ColumnarValue::Scalar(ScalarValue::Utf8View(value)) => {
+                consumer.consume(ScalarString(value))
+            }
+
             ColumnarValue::Scalar(scalar) => {
-                if let ScalarValue::Utf8(value) = scalar {
-                    consumer.consume(ScalarString(value))
-                } else {
-                    Err(DataFusionError::Internal(format!(
-                        "Could not cast scalar {:?} value to Utf8 scalar",
-                        scalar,
-                    )))
-                }
+                internal_err!("Expected string scalar, got {:?}", scalar)
             }
         }
     }
@@ -69,7 +70,19 @@ impl ExArgType for ImplAsRefStr {
 
 // TODO implement this in terms of GenericByteArray
 
-impl ExArrayReader for StringArray {
+impl ExArrayReader for &StringArray {
+    type ValueType = ImplAsRefStr;
+
+    fn is_valid(&self, position: usize) -> bool {
+        Array::is_valid(&self, position)
+    }
+
+    fn get(&self, position: usize) -> Self::ValueType {
+        ImplAsRefStr(self.value(position).into())
+    }
+}
+
+impl ExArrayReader for &StringViewArray {
     type ValueType = ImplAsRefStr;
 
     fn is_valid(&self, position: usize) -> bool {
