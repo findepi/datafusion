@@ -34,30 +34,9 @@ use datafusion_expr::ColumnarValue;
 macro_rules! primitive_type {
     ($native_type:ty, $dt_option_name:ident, $array_type:ty, $as_array:ident) => {
         impl ExArgType for $native_type {
-            // type ArrayReaderType = $array_type;
-            // type ScalarReaderType = Option<$native_type>;
-
             fn logical_type() -> NativeType {
                 DataType::$dt_option_name.into()
             }
-
-            // fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
-            //     Ok($as_array(&array)?
-            //         // shallow clone of the array
-            //         .clone())
-            // }
-            //
-            // fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
-            //     if let ScalarValue::$dt_option_name(value) = scalar {
-            //         Ok(value)
-            //     } else {
-            //         Err(DataFusionError::Internal(format!(
-            //             "Could not cast scalar {:?} value to {} scalar",
-            //             scalar,
-            //             stringify!($native_type)
-            //         )))
-            //     }
-            // }
 
             fn decode(
                 arg: ColumnarValue,

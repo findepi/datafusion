@@ -38,29 +38,9 @@ impl AsRef<str> for ImplAsRefStr {
 }
 
 impl ExArgType for ImplAsRefStr {
-    // type ArrayReaderType = StringArray;
-    // type ScalarReaderType = ScalarString;
-
     fn logical_type() -> NativeType {
         NativeType::String
     }
-
-    // fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
-    //     Ok(as_string_array(&array)?
-    // // shallow clone of the array
-    // .clone())
-    // }
-    //
-    // fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
-    //     if let ScalarValue::Utf8(value) = scalar {
-    //         Ok(ScalarString(value))
-    //     } else {
-    //         Err(DataFusionError::Internal(format!(
-    //             "Could not cast scalar {:?} value to Utf8 scalar",
-    //             scalar,
-    //         )))
-    //     }
-    // }
 
     fn decode(
         arg: ColumnarValue,

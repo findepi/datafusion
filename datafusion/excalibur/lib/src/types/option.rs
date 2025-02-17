@@ -33,20 +33,6 @@ where
         T::logical_type()
     }
 
-    // fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
-    //     Ok(NullableReader {
-    //         delegate: T::read_array(array)?,
-    //     })
-    // }
-    //
-    // fn read_scalar(
-    //     scalar: ScalarValue,
-    // ) -> datafusion_common::Result<Self::ScalarReaderType> {
-    //     Ok(NullableReader {
-    //         delegate: T::read_scalar(scalar)?,
-    //     })
-    // }
-
     fn decode(
         arg: ColumnarValue,
         consumer: impl ExArrayReaderConsumer<ValueType = Self>,
