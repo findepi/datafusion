@@ -15,10 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+use crate::arg_type::{ExArgType};
 use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
-use crate::reader::ExArrayReader;
-use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer};
+use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
 use datafusion_expr::ScalarFunctionArgs;

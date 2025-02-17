@@ -15,18 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::reader::ExArrayReader;
-use datafusion_common::types::NativeType;
 use datafusion_common::Result;
-use datafusion_expr::ColumnarValue;
 
-pub trait ExArgType {
-    fn logical_type() -> NativeType;
+pub trait ExArrayReader {
+    type ValueType;
 
-    fn decode(
-        arg: ColumnarValue,
-        consumer: impl ExArrayReaderConsumer<ValueType = Self>,
-    ) -> Result<()>;
+    // TODO use this for loop unswitching
+    /// Returns the length L of the stride of  positions guaranteed to be valid, starting
+    /// from the given position S. The position S + L is *not* guaranteed
+    /// to be invalid.
+    fn valid_stride(&self, start_position: usize) -> usize {
+        if self.is_valid(start_position) {
+            1
+        } else {
+            0
+        }
+    }
+
+    /// Checks whether the position is valid or null.
+    ///
+    /// Panics if position out of bounds.
+    fn is_valid(&self, position: usize) -> bool;
+
+    /// Retrieves the value at the given position.
+    ///
+    /// Panics if position is invalid or out of bounds.
+    fn get(&self, position: usize) -> Self::ValueType;
 }
 
 pub trait ExArrayReaderConsumer {
@@ -35,8 +49,4 @@ pub trait ExArrayReaderConsumer {
     fn consume<AR>(self, reader: AR) -> Result<()>
     where
         AR: ExArrayReader<ValueType = Self::ValueType>;
-}
-
-pub trait FindExArgType {
-    type Type: ExArgType;
 }

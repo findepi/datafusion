@@ -15,14 +15,52 @@
 // specific language governing permissions and limitations
 // under the License.
 
+use crate::arg_type::{ExArgType};
 use crate::builder::{ExArrayBuilder, ExFullResultType};
-use arrow::array::{ArrayRef, BooleanBuilder, PrimitiveBuilder};
+use crate::primitive_type;
+use crate::reader::ExArrayReader;
+use crate::ret_type::ExRetType;
+use arrow::array::{Array, ArrowPrimitiveType, PrimitiveArray};
+use arrow::array::{ArrayRef, PrimitiveBuilder};
+use arrow::datatypes::DataType;
 use arrow::datatypes::{
-    ArrowPrimitiveType, Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type,
-    UInt32Type, UInt64Type, UInt8Type,
+    Int16Type, Int32Type, Int64Type, Int8Type, UInt16Type, UInt32Type, UInt64Type,
+    UInt8Type,
 };
-use datafusion_common::Result;
+use datafusion_common::cast::{
+    as_int16_array, as_int32_array, as_int64_array, as_int8_array, as_uint16_array,
+    as_uint32_array, as_uint64_array, as_uint8_array,
+};
+use datafusion_common::types::NativeType;
+use datafusion_common::ScalarValue;
+use datafusion_common::{internal_err, Result};
+use datafusion_expr::ColumnarValue;
 use std::sync::Arc;
+
+primitive_type!(i8, Int8, Int8Array, as_int8_array);
+primitive_type!(i16, Int16, Int16Array, as_int16_array);
+primitive_type!(i32, Int32, Int32Array, as_int32_array);
+primitive_type!(i64, Int64, Int64Array, as_int64_array);
+
+primitive_type!(u8, UInt8, UInt8Array, as_uint8_array);
+primitive_type!(u16, UInt16, UInt16Array, as_uint16_array);
+primitive_type!(u32, UInt32, UInt32Array, as_uint32_array);
+primitive_type!(u64, UInt64, UInt64Array, as_uint64_array);
+
+impl<T> ExArrayReader for PrimitiveArray<T>
+where
+    T: ArrowPrimitiveType,
+{
+    type ValueType = T::Native;
+
+    fn is_valid(&self, position: usize) -> bool {
+        Array::is_valid(self, position)
+    }
+
+    fn get(&self, position: usize) -> Self::ValueType {
+        self.value(position)
+    }
+}
 
 macro_rules! primitive_result_type {
     ($native_type:ty, $arrow_primitive_type:ty) => {
@@ -56,35 +94,6 @@ where
     fn get_out_arg(&mut self, _position: usize) {}
 
     fn append(&mut self, _out_arg: (), fn_ret: T::Native) -> Result<()> {
-        self.append_value(fn_ret);
-        Ok(())
-    }
-
-    fn append_null(&mut self) -> Result<()> {
-        self.append_null();
-        Ok(())
-    }
-
-    fn build(mut self) -> Result<ArrayRef> {
-        Ok(Arc::new(self.finish()))
-    }
-}
-
-impl ExFullResultType for ((), bool) {
-    type BuilderType = BooleanBuilder;
-
-    fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
-        Self::BuilderType::with_capacity(number_rows)
-    }
-}
-
-impl ExArrayBuilder for BooleanBuilder {
-    type OutArg = ();
-    type Return = bool;
-
-    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {}
-
-    fn append(&mut self, _out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
         self.append_value(fn_ret);
         Ok(())
     }

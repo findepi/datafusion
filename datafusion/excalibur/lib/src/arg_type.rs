@@ -15,32 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::reader::ExArrayReader;
-use arrow::array::{Array, ArrowPrimitiveType, BooleanArray, PrimitiveArray};
+use crate::reader::ExArrayReaderConsumer;
+use datafusion_common::types::NativeType;
+use datafusion_common::Result;
+use datafusion_expr::ColumnarValue;
 
-impl<T> ExArrayReader for PrimitiveArray<T>
-where
-    T: ArrowPrimitiveType,
-{
-    type ValueType = T::Native;
+pub trait ExArgType {
+    fn logical_type() -> NativeType;
 
-    fn is_valid(&self, position: usize) -> bool {
-        Array::is_valid(self, position)
-    }
-
-    fn get(&self, position: usize) -> Self::ValueType {
-        self.value(position)
-    }
+    fn decode(
+        arg: ColumnarValue,
+        consumer: impl ExArrayReaderConsumer<ValueType = Self>,
+    ) -> Result<()>;
 }
 
-impl ExArrayReader for BooleanArray {
-    type ValueType = bool;
-
-    fn is_valid(&self, position: usize) -> bool {
-        Array::is_valid(self, position)
-    }
-
-    fn get(&self, position: usize) -> Self::ValueType {
-        self.value(position)
-    }
+pub trait FindExArgType {
+    type Type: ExArgType;
 }

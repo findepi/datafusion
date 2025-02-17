@@ -15,22 +15,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
+mod arg_type;
+mod arg_type_list;
+mod boolean;
 mod bridge;
 mod builder;
+mod ints;
 mod invoke;
+mod option_arg;
+mod option_ret;
+mod primitives;
 mod reader;
+mod result;
+mod ret_type;
 mod scalar_udf;
 mod signature;
 mod string;
-mod types;
 
 // Not public API.
 #[doc(hidden)]
 pub mod __private {
     // Re-exports used by the macros.
 
+    pub use crate::arg_type::FindExArgType;
     pub use crate::bridge::ExcaliburScalarUdf;
     pub use crate::scalar_udf::create_excalibur_scalar_udf;
-    pub use crate::types::arg_type::FindExArgType;
     pub use datafusion_expr::ScalarUDFImpl;
 }

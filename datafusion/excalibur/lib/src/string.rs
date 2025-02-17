@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::reader::ExArrayReader;
-use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer, FindExArgType};
+use crate::arg_type::{ExArgType, FindExArgType};
+use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use arrow::array::{Array, StringArray, StringViewArray};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::{as_string_array, as_string_view_array};

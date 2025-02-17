@@ -15,10 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::reader::ExArrayReader;
-use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer};
-use crate::types::ret_type::ExRetType;
-use arrow::datatypes::DataType;
+use crate::arg_type::{ExArgType};
+use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
@@ -84,11 +82,18 @@ where
     }
 }
 
-impl<T> ExRetType for Option<T>
+// Generic reader for scalar values
+impl<T> ExArrayReader for Option<T>
 where
-    T: ExRetType,
+    T: Copy,
 {
-    fn data_type() -> DataType {
-        T::data_type()
+    type ValueType = T;
+
+    fn is_valid(&self, _position: usize) -> bool {
+        self.is_some()
+    }
+
+    fn get(&self, _position: usize) -> Self::ValueType {
+        self.unwrap()
     }
 }
