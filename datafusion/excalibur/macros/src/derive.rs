@@ -141,10 +141,10 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
                     if trait_bound.lifetimes.is_none() {
                         if let TraitBoundModifier::None = trait_bound.modifier {
                             let trait_path = &trait_bound.path;
-                            let impl_type: Type =
-                                parse_quote! {<dyn #trait_path as FindExArgType>::Type };
                             return Ok((
-                                impl_type,
+                                force_type::<Type>(
+                                    parse_quote! {<dyn #trait_path as FindExArgType>::Type },
+                                ),
                                 quote! { #arg_name },
                                 quote! { #arg_name },
                             ));
