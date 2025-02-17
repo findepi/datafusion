@@ -25,7 +25,7 @@ use datafusion_expr::{Signature, Volatility};
 pub fn create_excalibur_signature<T>() -> ExcaliburSignature
 where
     T: ExcaliburScalarUdf,
-    T::ArgumentRustTypes: ExArgTypeList,
+    for <'a> T::ArgumentRustTypes<'a>: ExArgTypeList,
     T::ReturnRustType: ExRetType,
 {
     ExcaliburSignature {

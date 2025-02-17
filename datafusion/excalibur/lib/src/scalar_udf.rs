@@ -32,8 +32,8 @@ use std::sync::Arc;
 pub fn create_excalibur_scalar_udf<T>() -> Arc<dyn ScalarUDFImpl>
 where
     T: ExcaliburScalarUdf + Send + Sync + 'static,
-    T::ArgumentRustTypes: ExArgTypeList,
-    T::ArgumentRustTypes: ApplyList,
+    for <'a> T::ArgumentRustTypes<'a>: ExArgTypeList,
+    for <'a> T::ArgumentRustTypes<'a>: ApplyList,
     T::ReturnRustType: ExRetType,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
@@ -65,7 +65,7 @@ where
 impl<T> ScalarUDFImpl for ExcaliburScalarUdfImpl<T>
 where
     T: ExcaliburScalarUdf + Send + Sync + 'static,
-    T::ArgumentRustTypes: ApplyList,
+    for <'a> T::ArgumentRustTypes<'a>: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
             OutArg = T::OutArgRustType,
@@ -90,7 +90,7 @@ where
     }
 
     fn invoke_with_args(&self, args: ScalarFunctionArgs) -> Result<ColumnarValue> {
-        excalibur_invoke::<T>(args)
+        excalibur_invoke::<T>(args, &())
     }
 
     fn invoke_batch(
