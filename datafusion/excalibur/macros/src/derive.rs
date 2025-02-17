@@ -70,26 +70,24 @@ fn struct_definition(
     let orig_rust_function_name = &input.name;
     let impl_struct_name = format_ident!("{}", to_camel_case(sql_function_name));
     let rust_arg_count = input.args.len() as u8;
-    let rust_arg_type_list = to_type_list(
-        input
-            .args
-            .iter()
-            .map(|arg| arg_implementing_type(&arg.ty))
-            .collect::<Result<Vec<_>>>()?,
-    );
-    let rust_return_type = &input.return_ty;
-
-    let (destruct_args, invoke_args, _) = input.args.iter().rfold(
-        (quote! { () }, quote! {}, input.args.len()),
-        |(destruct_args, invoke_args, pos), arg| {
-            let arg = new_arg_name(&arg.name, pos - 1);
+    let (rust_arg_type_list, destruct_args, invoke_args) =
+        input.args.iter().enumerate().try_rfold(
             (
-                quote! { (#arg, #destruct_args) },
-                quote! { #arg, #invoke_args },
-                pos - 1,
-            )
-        },
-    );
+                force_type::<Type>(parse_quote! { () }),
+                quote! { () },
+                quote! {},
+            ),
+            |(type_list, destruct_args, invoke), (pos, arg)| -> Result<_> {
+                let impl_type = arg_implementing_type(&arg.ty)?;
+                let arg = new_arg_name(&arg.name, pos);
+                Ok((
+                    force_type::<Type>(parse_quote! { (#impl_type, #type_list) }),
+                    quote! { (#arg, #destruct_args) },
+                    quote! { #arg, #invoke },
+                ))
+            },
+        )?;
+    let rust_return_type = &input.return_ty;
 
     let struct_definition = quote! {
         struct #impl_struct_name {}
@@ -121,21 +119,6 @@ fn sql_function_name(attributes: &EFAttributes, input: &InputFnInfo) -> String {
     } else {
         input.name.to_string()
     }
-}
-
-fn to_type_list(types: Vec<Type>) -> Type {
-    types.iter().rfold(
-        Type::Tuple(TypeTuple {
-            paren_token: Default::default(),
-            elems: Default::default(),
-        }),
-        |acc, ty| {
-            Type::Tuple(TypeTuple {
-                paren_token: Default::default(),
-                elems: [ty.to_owned(), acc].into_iter().collect(),
-            })
-        },
-    )
 }
 
 fn new_arg_name(name: &Ident, pos: usize) -> Ident {
@@ -173,4 +156,8 @@ fn arg_implementing_type(ty: &Type) -> Result<Type> {
         ty.span(),
         "Function argument has unsupported type for use with Excalibur",
     ))
+}
+
+fn force_type<T>(val: T) -> T {
+    val
 }
