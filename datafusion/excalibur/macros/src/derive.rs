@@ -153,12 +153,24 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
                 }
             }
         }
+
+        Type::Reference(type_reference) => {
+            if type_reference.mutability.is_none() && type_reference.lifetime.is_none() {
+                let referred = &type_reference.elem;
+                return Ok((
+                    force_type::<Type>(parse_quote! { FindExArgType<dyn AsRef<#referred>> }),
+                    quote! { #arg_name },
+                    quote! { #arg_name.as_ref() },
+                ));
+            }
+        }
+
         Type::Path(_) => {
             return Ok((
-                force_type::<Type>(
-                    parse_quote! { FindExArgType<#ty> },
-                ),
-                quote! { #arg_name }, quote! { #arg_name }));
+                force_type::<Type>(parse_quote! { FindExArgType<#ty> }),
+                quote! { #arg_name },
+                quote! { #arg_name },
+            ));
         }
         _ => {}
     }
