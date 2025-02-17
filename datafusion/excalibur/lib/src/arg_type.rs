@@ -16,7 +16,6 @@
 // under the License.
 
 use crate::reader::ExArrayReaderConsumer;
-use crate::string::ImplAsRefStr;
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
@@ -35,8 +34,6 @@ pub type FindExArgType<T> = <T as ExFindImplementation>::Type;
 pub trait ExFindImplementation {
     type Type: ExArgType;
 }
-
-
 
 impl<T> ExFindImplementation for T
 where
