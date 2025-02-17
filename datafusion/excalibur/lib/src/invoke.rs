@@ -114,8 +114,8 @@ struct ApplyListHeadConsumer<'a, Head, Tail, Builder, Valid, Invoke> {
     _phantom_tail: std::marker::PhantomData<Tail>,
 }
 
-impl<'a, Head, Tail, Builder, Valid, Invoke> ExArrayReaderConsumer
-    for ApplyListHeadConsumer<'a, Head, Tail, Builder, Valid, Invoke>
+impl<Head, Tail, Builder, Valid, Invoke> ExArrayReaderConsumer
+    for ApplyListHeadConsumer<'_, Head, Tail, Builder, Valid, Invoke>
 where
     Tail: ApplyList,
     Builder: ExArrayBuilder,

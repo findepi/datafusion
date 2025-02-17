@@ -18,11 +18,9 @@
 use crate::reader::ExArrayReader;
 use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer};
 use crate::types::ret_type::ExRetType;
-use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
-use datafusion_common::ScalarValue;
 use datafusion_expr::ColumnarValue;
 
 impl<T> ExArgType for Option<T>

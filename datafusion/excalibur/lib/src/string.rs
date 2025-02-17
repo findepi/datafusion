@@ -17,7 +17,7 @@
 
 use crate::reader::ExArrayReader;
 use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer, FindExArgType};
-use arrow::array::{Array, ArrayRef, StringArray};
+use arrow::array::{Array, StringArray};
 use datafusion_common::cast::as_string_array;
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
