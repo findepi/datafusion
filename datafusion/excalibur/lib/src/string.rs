@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::{ExArgType, FindExArgType};
+use crate::arg_type::{ExArgType, ExFindImplementation};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use arrow::array::{Array, StringArray, StringViewArray};
 use arrow::datatypes::DataType;
@@ -26,7 +26,7 @@ use datafusion_common::{internal_err, Result};
 use datafusion_expr::ColumnarValue;
 use std::ptr::NonNull;
 
-impl FindExArgType for dyn AsRef<str> {
+impl ExFindImplementation for dyn AsRef<str> {
     type Type = ImplAsRefStr;
 }
 

@@ -143,7 +143,7 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
                             let trait_path = &trait_bound.path;
                             return Ok((
                                 force_type::<Type>(
-                                    parse_quote! {<dyn #trait_path as FindExArgType>::Type },
+                                    parse_quote! { FindExArgType<dyn #trait_path> },
                                 ),
                                 quote! { #arg_name },
                                 quote! { #arg_name },
@@ -154,7 +154,11 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
             }
         }
         Type::Path(_) => {
-            return Ok((ty.to_owned(), quote! { #arg_name }, quote! { #arg_name }));
+            return Ok((
+                force_type::<Type>(
+                    parse_quote! { FindExArgType<#ty> },
+                ),
+                quote! { #arg_name }, quote! { #arg_name }));
         }
         _ => {}
     }
