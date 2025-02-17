@@ -18,7 +18,7 @@
 use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::ExArrayReader;
-use crate::types::arg_type::ExArgType;
+use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer};
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
 use datafusion_expr::ScalarFunctionArgs;
@@ -91,33 +91,62 @@ where
         Invoke: Fn(usize, Self, &mut Builder::OutArg) -> Builder::Return,
     {
         let arg = args.pop_front().unwrap();
-        match arg {
-            ColumnarValue::Array(array) => {
-                let reader = Head::read_array(array)?;
-                Tail::apply(
-                    args,
-                    number_rows,
-                    |position| valid(position) && reader.is_valid(position),
-                    |position, tail_args, out_arg| {
-                        let head_arg: Head = reader.get(position);
-                        invoke(position, (head_arg, tail_args), out_arg)
-                    },
-                    builder,
-                )
-            }
-            ColumnarValue::Scalar(scalar) => {
-                let reader = Head::read_scalar(scalar)?;
-                Tail::apply(
-                    args,
-                    number_rows,
-                    |position| valid(position) && reader.is_valid(position),
-                    |position, tail_args, out_arg| {
-                        invoke(position, (reader.get(position), tail_args), out_arg)
-                    },
-                    builder,
-                )
-            }
-        }
+        let continuation = ApplyListHeadConsumer {
+            remaining_args: args,
+            number_rows,
+            valid,
+            invoke,
+            builder,
+            _phantom_head: std::marker::PhantomData::<Head>,
+            _phantom_tail: std::marker::PhantomData::<Tail>,
+        };
+        Head::decode(arg, continuation)
+    }
+}
+
+struct ApplyListHeadConsumer<'a, Head, Tail, Builder, Valid, Invoke> {
+    remaining_args: VecDeque<ColumnarValue>,
+    number_rows: usize,
+    valid: Valid,
+    invoke: Invoke,
+    builder: &'a mut Builder,
+    _phantom_head: std::marker::PhantomData<Head>,
+    _phantom_tail: std::marker::PhantomData<Tail>,
+}
+
+impl<'a, Head, Tail, Builder, Valid, Invoke> ExArrayReaderConsumer
+    for ApplyListHeadConsumer<'a, Head, Tail, Builder, Valid, Invoke>
+where
+    Tail: ApplyList,
+    Builder: ExArrayBuilder,
+    Valid: Fn(usize) -> bool,
+    Invoke: Fn(usize, (Head, Tail), &mut Builder::OutArg) -> Builder::Return,
+{
+    type ValueType = Head;
+
+    fn consume<AR>(self, reader: AR) -> Result<()>
+    where
+        AR: ExArrayReader<ValueType = Head>,
+    {
+        let ApplyListHeadConsumer {
+            remaining_args: args,
+            number_rows,
+            valid,
+            invoke,
+            builder,
+            _phantom_head,
+            _phantom_tail,
+        } = self;
+        Tail::apply(
+            args,
+            number_rows,
+            |position| valid(position) && reader.is_valid(position),
+            |position, tail_args, out_arg| {
+                let head_arg: Head = reader.get(position);
+                invoke(position, (head_arg, tail_args), out_arg)
+            },
+            builder,
+        )
     }
 }
 

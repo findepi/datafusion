@@ -18,8 +18,9 @@
 use crate::reader::ExArrayReader;
 use arrow::array::ArrayRef;
 use datafusion_common::types::NativeType;
-use datafusion_common::Result;
+use datafusion_common::{Result};
 use datafusion_common::ScalarValue;
+use datafusion_expr::ColumnarValue;
 
 pub trait ExArgType {
     type ArrayReaderType: ExArrayReader<ValueType = Self>;
@@ -30,6 +31,29 @@ pub trait ExArgType {
     fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType>;
 
     fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType>;
+
+    fn decode(arg: ColumnarValue, consumer: impl ExArrayReaderConsumer<ValueType=Self>) -> Result<()>
+    // TODO remove this impl
+    {
+        match arg {
+            ColumnarValue::Array(array) => {
+                let reader = Self::read_array(array)?;
+                consumer.consume(reader)
+            }
+            ColumnarValue::Scalar(scalar) => {
+                let reader = Self::read_scalar(scalar)?;
+                consumer.consume(reader)
+            }
+        }
+    }
+}
+
+pub trait ExArrayReaderConsumer {
+    type ValueType;
+
+    fn consume<AR>(self, reader: AR) -> Result<()>
+    where
+        AR: ExArrayReader<ValueType = Self::ValueType>;
 }
 
 pub trait FindExArgType {
