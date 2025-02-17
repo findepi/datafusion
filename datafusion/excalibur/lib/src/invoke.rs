@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::{ExArgType};
+use crate::arg_type::ExArgType;
 use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};

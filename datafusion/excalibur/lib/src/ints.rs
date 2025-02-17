@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::{ExArgType};
+use crate::arg_type::ExArgType;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::primitive_type;
 use crate::reader::ExArrayReader;
@@ -31,10 +31,7 @@ use datafusion_common::cast::{
     as_int16_array, as_int32_array, as_int64_array, as_int8_array, as_uint16_array,
     as_uint32_array, as_uint64_array, as_uint8_array,
 };
-use datafusion_common::types::NativeType;
-use datafusion_common::ScalarValue;
-use datafusion_common::{internal_err, Result};
-use datafusion_expr::ColumnarValue;
+use datafusion_common::Result;
 use std::sync::Arc;
 
 primitive_type!(i8, Int8, Int8Array, as_int8_array);

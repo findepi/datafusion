@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::{ExArgType};
+use crate::arg_type::ExArgType;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::primitive_type;
 use crate::reader::ExArrayReader;
@@ -23,10 +23,7 @@ use crate::ret_type::ExRetType;
 use arrow::array::{Array, ArrayRef, BooleanArray, BooleanBuilder};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::as_boolean_array;
-use datafusion_common::types::NativeType;
-use datafusion_common::ScalarValue;
-use datafusion_common::{internal_err, Result};
-use datafusion_expr::ColumnarValue;
+use datafusion_common::Result;
 use std::sync::Arc;
 
 primitive_type!(bool, Boolean, BooleanArray, as_boolean_array);

@@ -27,12 +27,10 @@ macro_rules! primitive_type {
                 arg: datafusion_expr::ColumnarValue,
                 consumer: impl $crate::reader::ExArrayReaderConsumer<ValueType = Self>,
             ) -> Result<()> {
-                use datafusion_expr::ColumnarValue::*;
                 use datafusion_common::ScalarValue;
+                use datafusion_expr::ColumnarValue::*;
                 match arg {
-                    Array(array) => {
-                        consumer.consume($as_array(&array)?)
-                    }
+                    Array(array) => consumer.consume($as_array(&array)?),
                     Scalar(scalar) => {
                         if let ScalarValue::$dt_option_name(value) = scalar {
                             consumer.consume(value)

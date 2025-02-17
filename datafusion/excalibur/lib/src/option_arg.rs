@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::{ExArgType};
+use crate::arg_type::ExArgType;
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
