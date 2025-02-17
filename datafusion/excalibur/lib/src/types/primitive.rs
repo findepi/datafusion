@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::types::arg_type::ExArgType;
+use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer};
 use crate::types::ret_type::ExRetType;
 use arrow::array::{
     ArrayRef, BooleanArray, Int16Array, Int32Array, Int64Array, Int8Array, UInt16Array,
@@ -29,32 +29,58 @@ use datafusion_common::cast::{
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_common::{DataFusionError, ScalarValue};
+use datafusion_expr::ColumnarValue;
 
 macro_rules! primitive_type {
     ($native_type:ty, $dt_option_name:ident, $array_type:ty, $as_array:ident) => {
         impl ExArgType for $native_type {
-            type ArrayReaderType = $array_type;
-            type ScalarReaderType = Option<$native_type>;
+            // type ArrayReaderType = $array_type;
+            // type ScalarReaderType = Option<$native_type>;
 
             fn logical_type() -> NativeType {
                 DataType::$dt_option_name.into()
             }
 
-            fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
-                Ok($as_array(&array)?
-                    // shallow clone of the array
-                    .clone())
-            }
+            // fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
+            //     Ok($as_array(&array)?
+            //         // shallow clone of the array
+            //         .clone())
+            // }
+            //
+            // fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
+            //     if let ScalarValue::$dt_option_name(value) = scalar {
+            //         Ok(value)
+            //     } else {
+            //         Err(DataFusionError::Internal(format!(
+            //             "Could not cast scalar {:?} value to {} scalar",
+            //             scalar,
+            //             stringify!($native_type)
+            //         )))
+            //     }
+            // }
 
-            fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
-                if let ScalarValue::$dt_option_name(value) = scalar {
-                    Ok(value)
-                } else {
-                    Err(DataFusionError::Internal(format!(
-                        "Could not cast scalar {:?} value to {} scalar",
-                        scalar,
-                        stringify!($native_type)
-                    )))
+            fn decode(
+                arg: ColumnarValue,
+                consumer: impl ExArrayReaderConsumer<ValueType = Self>,
+            ) -> Result<()> {
+                match arg {
+                    ColumnarValue::Array(array) => {
+                        let cast_array = $as_array(&array)?
+                            // shallow clone of the array
+                            .clone();
+                        consumer.consume(cast_array)
+                    }
+                    ColumnarValue::Scalar(scalar) => {
+                        if let ScalarValue::$dt_option_name(value) = scalar {
+                            consumer.consume(value)
+                        } else {
+                            Err(DataFusionError::Internal(format!(
+                                "Could not cast scalar {:?} value to {} scalar",
+                                scalar,
+                                stringify!($native_type)
+                            )))
+                        }
+                    }
                 }
             }
         }

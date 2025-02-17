@@ -16,12 +16,13 @@
 // under the License.
 
 use crate::reader::ExArrayReader;
-use crate::types::arg_type::{ExArgType, FindExArgType};
+use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer, FindExArgType};
 use arrow::array::{Array, ArrayRef, StringArray};
 use datafusion_common::cast::as_string_array;
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_common::{DataFusionError, ScalarValue};
+use datafusion_expr::ColumnarValue;
 use std::ptr::NonNull;
 
 impl FindExArgType for dyn AsRef<str> {
@@ -37,27 +38,51 @@ impl AsRef<str> for ImplAsRefStr {
 }
 
 impl ExArgType for ImplAsRefStr {
-    type ArrayReaderType = StringArray;
-    type ScalarReaderType = ScalarString;
+    // type ArrayReaderType = StringArray;
+    // type ScalarReaderType = ScalarString;
 
     fn logical_type() -> NativeType {
         NativeType::String
     }
 
-    fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
-        Ok(as_string_array(&array)?
-            // shallow clone of the array
-            .clone())
-    }
+    // fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
+    //     Ok(as_string_array(&array)?
+    // // shallow clone of the array
+    // .clone())
+    // }
+    //
+    // fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
+    //     if let ScalarValue::Utf8(value) = scalar {
+    //         Ok(ScalarString(value))
+    //     } else {
+    //         Err(DataFusionError::Internal(format!(
+    //             "Could not cast scalar {:?} value to Utf8 scalar",
+    //             scalar,
+    //         )))
+    //     }
+    // }
 
-    fn read_scalar(scalar: ScalarValue) -> Result<Self::ScalarReaderType> {
-        if let ScalarValue::Utf8(value) = scalar {
-            Ok(ScalarString(value))
-        } else {
-            Err(DataFusionError::Internal(format!(
-                "Could not cast scalar {:?} value to Utf8 scalar",
-                scalar,
-            )))
+    fn decode(
+        arg: ColumnarValue,
+        consumer: impl ExArrayReaderConsumer<ValueType = Self>,
+    ) -> Result<()> {
+        match arg {
+            ColumnarValue::Array(array) => {
+                let string_array = as_string_array(&array)?
+                    // shallow clone of the array
+                    .clone();
+                consumer.consume(string_array)
+            }
+            ColumnarValue::Scalar(scalar) => {
+                if let ScalarValue::Utf8(value) = scalar {
+                    consumer.consume(ScalarString(value))
+                } else {
+                    Err(DataFusionError::Internal(format!(
+                        "Could not cast scalar {:?} value to Utf8 scalar",
+                        scalar,
+                    )))
+                }
+            }
         }
     }
 }
@@ -76,7 +101,7 @@ impl ExArrayReader for StringArray {
     }
 }
 
-pub struct ScalarString(Option<String>);
+struct ScalarString(Option<String>);
 
 impl ExArrayReader for ScalarString {
     type ValueType = ImplAsRefStr;

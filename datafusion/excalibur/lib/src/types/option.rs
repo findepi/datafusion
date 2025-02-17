@@ -16,40 +16,68 @@
 // under the License.
 
 use crate::reader::ExArrayReader;
-use crate::types::arg_type::ExArgType;
+use crate::types::arg_type::{ExArgType, ExArrayReaderConsumer};
 use crate::types::ret_type::ExRetType;
 use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use datafusion_common::types::NativeType;
+use datafusion_common::Result;
 use datafusion_common::ScalarValue;
+use datafusion_expr::ColumnarValue;
 
 impl<T> ExArgType for Option<T>
 where
     T: ExArgType,
 {
-    type ArrayReaderType = NullableReader<T::ArrayReaderType>;
-    type ScalarReaderType = NullableReader<T::ScalarReaderType>;
-
     fn logical_type() -> NativeType {
         T::logical_type()
     }
 
-    fn read_array(array: ArrayRef) -> datafusion_common::Result<Self::ArrayReaderType> {
-        Ok(NullableReader {
-            delegate: T::read_array(array)?,
-        })
-    }
+    // fn read_array(array: ArrayRef) -> Result<Self::ArrayReaderType> {
+    //     Ok(NullableReader {
+    //         delegate: T::read_array(array)?,
+    //     })
+    // }
+    //
+    // fn read_scalar(
+    //     scalar: ScalarValue,
+    // ) -> datafusion_common::Result<Self::ScalarReaderType> {
+    //     Ok(NullableReader {
+    //         delegate: T::read_scalar(scalar)?,
+    //     })
+    // }
 
-    fn read_scalar(
-        scalar: ScalarValue,
-    ) -> datafusion_common::Result<Self::ScalarReaderType> {
-        Ok(NullableReader {
-            delegate: T::read_scalar(scalar)?,
-        })
+    fn decode(
+        arg: ColumnarValue,
+        consumer: impl ExArrayReaderConsumer<ValueType = Self>,
+    ) -> Result<()> {
+        let consumer = NullableConsumer { delegate: consumer };
+        T::decode(arg, consumer)
     }
 }
 
-pub struct NullableReader<Delegate> {
+struct NullableConsumer<Delegate> {
+    delegate: Delegate,
+}
+
+impl<T, Delegate> ExArrayReaderConsumer for NullableConsumer<Delegate>
+where
+    Delegate: ExArrayReaderConsumer<ValueType = Option<T>>,
+{
+    type ValueType = T;
+
+    fn consume<AR>(self, reader: AR) -> Result<()>
+    where
+        AR: ExArrayReader<ValueType = Self::ValueType>,
+    {
+        let NullableConsumer { delegate } = self;
+
+        let reader = NullableReader { delegate: reader };
+        delegate.consume(reader)
+    }
+}
+
+struct NullableReader<Delegate> {
     delegate: Delegate,
 }
 
