@@ -135,25 +135,6 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
     let ty = &arg.ty;
     let arg_name = &arg.name;
     match ty {
-        Type::ImplTrait(impl_trait) => {
-            if impl_trait.bounds.len() == 1 {
-                if let syn::TypeParamBound::Trait(trait_bound) = &impl_trait.bounds[0] {
-                    if trait_bound.lifetimes.is_none() {
-                        if let TraitBoundModifier::None = trait_bound.modifier {
-                            let trait_path = &trait_bound.path;
-                            return Ok((
-                                force_type::<Type>(
-                                    parse_quote! { FindExArgType<dyn #trait_path> },
-                                ),
-                                quote! { #arg_name },
-                                quote! { #arg_name },
-                            ));
-                        }
-                    }
-                }
-            }
-        }
-
         Type::Reference(type_reference) => {
             if type_reference.mutability.is_none() && type_reference.lifetime.is_none() {
                 let referred = &type_reference.elem;
