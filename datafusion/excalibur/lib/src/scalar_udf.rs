@@ -90,7 +90,7 @@ where
     }
 
     fn invoke_with_args(&self, args: ScalarFunctionArgs) -> Result<ColumnarValue> {
-        excalibur_invoke::<T>(args, &())
+        excalibur_invoke::<T>(args)
     }
 
     fn invoke_batch(

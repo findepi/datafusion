@@ -24,7 +24,7 @@ use datafusion_expr::ColumnarValue;
 use datafusion_expr::ScalarFunctionArgs;
 use std::collections::VecDeque;
 
-pub fn excalibur_invoke<T>(args: ScalarFunctionArgs, _: &()) -> Result<ColumnarValue>
+pub fn excalibur_invoke<T>(args: ScalarFunctionArgs) -> Result<ColumnarValue>
 where
     T: ExcaliburScalarUdf,
     T::ArgumentRustTypes: ApplyList,
