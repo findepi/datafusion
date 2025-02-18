@@ -51,17 +51,15 @@ impl InputFnInfo {
 
         let mut inputs: Vec<_> = sig.inputs.iter().collect();
         let mut out_arg = None;
-        if let Some(last) = inputs.last() {
-            if let FnArg::Typed(typed) = last {
-                if let Pat::Ident(ident) = &*typed.pat {
-                    if let Type::Reference(type_reference) = &*typed.ty {
-                        if type_reference.mutability.is_some() {
-                            out_arg = Some(NameType {
-                                name: ident.ident.clone(),
-                                ty: (*typed.ty).clone(),
-                            });
-                            inputs.pop();
-                        }
+        if let Some(FnArg::Typed(typed)) = inputs.last() {
+            if let Pat::Ident(ident) = &*typed.pat {
+                if let Type::Reference(type_reference) = &*typed.ty {
+                    if type_reference.mutability.is_some() {
+                        out_arg = Some(NameType {
+                            name: ident.ident.clone(),
+                            ty: (*typed.ty).clone(),
+                        });
+                        inputs.pop();
                     }
                 }
             }
