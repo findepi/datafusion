@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::ExArgType;
+use crate::arg_type::{ExArgType, ExInstantiable};
 use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
@@ -59,9 +59,7 @@ where
     Ok(ColumnarValue::Array(array))
 }
 
-pub trait ApplyList {
-    type StackType<'a>;
-
+pub trait ApplyList: ExInstantiable {
     fn apply<Builder, Valid, Invoke>(
         args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -75,13 +73,19 @@ pub trait ApplyList {
         Invoke: for <'a> Fn(usize, Self::StackType<'a>, &mut Builder::OutArg) -> Builder::Return;
 }
 
-impl<Head, Tail> ApplyList for (Head, Tail)
+impl<Head, Tail> ExInstantiable for (Head, Tail)
 where
     Head: ExArgType,
     Tail: ApplyList,
 {
     type StackType<'a> = (Head::StackType<'a>, Tail::StackType<'a>);
+}
 
+impl<Head, Tail> ApplyList for (Head, Tail)
+where
+    Head: ExArgType,
+    Tail: ApplyList,
+{
     fn apply<Builder, Valid, Invoke>(
         mut args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -162,9 +166,11 @@ where
     }
 }
 
-impl ApplyList for () {
+impl ExInstantiable for () {
     type StackType<'a> = ();
+}
 
+impl ApplyList for () {
     fn apply<Builder, Valid, Invoke>(
         args: VecDeque<ColumnarValue>,
         number_rows: usize,

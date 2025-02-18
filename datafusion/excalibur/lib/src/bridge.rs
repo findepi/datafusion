@@ -17,7 +17,7 @@
 
 //! Contract between the macro and the library
 
-use crate::invoke::ApplyList; // TODO better encapsulation
+use crate::arg_type::ExInstantiable;
 
 pub trait ExcaliburScalarUdf {
     // for example "my_function"
@@ -33,7 +33,7 @@ pub trait ExcaliburScalarUdf {
     // - (i32, (u64, ()) for my_function(a: i32, b: u64)
     // - (i32, (u64, ()) for my_function(a: i32, b: u64, out: &mut X)
     // excludes the out arg
-    type ArgumentRustTypes: ApplyList;
+    type ArgumentRustTypes: ExInstantiable;
 
     // T for `&mut T` passed to the function or () is there is no out argument
     type OutArgRustType;
@@ -42,7 +42,7 @@ pub trait ExcaliburScalarUdf {
     type ReturnRustType;
 
     fn invoke(
-        regular_args: <Self::ArgumentRustTypes as ApplyList>::StackType<'_>,
+        regular_args: <Self::ArgumentRustTypes as ExInstantiable>::StackType<'_>,
         out_arg: &mut Self::OutArgRustType,
     ) -> Self::ReturnRustType;
 }

@@ -56,7 +56,7 @@ fn common_imports() -> TokenStream {
         use ::datafusion_excalibur::__private::ExcaliburScalarUdf;
         use ::datafusion_excalibur::__private::FindExArgType;
         use ::datafusion_excalibur::__private::ScalarUDFImpl;
-        use ::datafusion_excalibur::__private::ApplyList;
+        use ::datafusion_excalibur::__private::ExInstantiable;
         use ::datafusion_excalibur::__private::create_excalibur_scalar_udf;
         use ::std::ops::Deref;
         use ::std::sync::Arc;
@@ -102,7 +102,7 @@ fn struct_definition(
             type ReturnRustType = #rust_return_type;
 
             fn invoke(
-                regular_args: <Self::ArgumentRustTypes as ApplyList>::StackType<'_>,
+                regular_args: <Self::ArgumentRustTypes as ExInstantiable>::StackType<'_>,
                 out_arg: &mut Self::OutArgRustType,
             ) -> Self::ReturnRustType {
                 // TODO real invoke body
