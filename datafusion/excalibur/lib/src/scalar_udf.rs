@@ -20,6 +20,7 @@ use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::invoke::{excalibur_invoke, ApplyList};
 // use crate::ret_type::ExRetType;
+use crate::__private::ExInstantiable;
 use crate::signature::{create_excalibur_signature, ExcaliburSignature};
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
@@ -28,7 +29,6 @@ use std::any::Any;
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::sync::Arc;
-use crate::__private::ExInstantiable;
 
 pub fn create_excalibur_scalar_udf<T>() -> Arc<dyn ScalarUDFImpl>
 where
@@ -38,7 +38,9 @@ where
     //T::ReturnRustType: ExRetType,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
-      OutArg: for<'a> ExInstantiable<StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>>,
+            OutArg: for<'a> ExInstantiable<
+                StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>,
+            >,
             Return = T::ReturnRustType,
         >,
     >,
@@ -69,7 +71,9 @@ where
     T::ArgumentRustTypes: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
-            OutArg: for<'a> ExInstantiable<StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>>,
+            OutArg: for<'a> ExInstantiable<
+                StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>,
+            >,
             Return = T::ReturnRustType,
         >,
     >,

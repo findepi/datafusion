@@ -20,9 +20,7 @@ use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use crate::ret_type::ExFindOutImplementation;
 use crate::ValuePresence;
-use arrow::array::{
-    Array, ArrayBuilder, ArrayRef, StringArray, StringBuilder, StringViewArray,
-};
+use arrow::array::{Array, ArrayRef, StringArray, StringBuilder, StringViewArray};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::{as_string_array, as_string_view_array};
 use datafusion_common::types::NativeType;
@@ -139,9 +137,7 @@ pub struct StringBuilderWriter<'a> {
 
 impl std::fmt::Write for StringBuilderWriter<'_> {
     fn write_str(&mut self, s: &str) -> std::fmt::Result {
-        self.builder
-            .write_str(s)
-            .map_err(|e| std::fmt::Error::default())
+        self.builder.write_str(s).map_err(|_| std::fmt::Error)
     }
 }
 

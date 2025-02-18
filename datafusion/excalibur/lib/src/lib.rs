@@ -41,8 +41,8 @@ pub mod __private {
 
     pub use crate::arg_type::ExInstantiable;
     pub use crate::arg_type::FindExArgType;
-    pub use crate::ret_type::FindExOutArgType;
     pub use crate::bridge::ExcaliburScalarUdf;
+    pub use crate::ret_type::FindExOutArgType;
     pub use crate::scalar_udf::create_excalibur_scalar_udf;
     pub use datafusion_expr::ScalarUDFImpl;
 }

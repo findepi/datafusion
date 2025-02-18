@@ -15,9 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::ExArgType;
-use arrow::datatypes::DataType;
-
 // pub trait ExRetType {
 //     fn data_type() -> DataType;
 // }

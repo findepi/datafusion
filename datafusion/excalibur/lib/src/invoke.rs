@@ -30,7 +30,9 @@ where
     T::ArgumentRustTypes: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
-            OutArg: for<'a> ExInstantiable<StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>>,
+            OutArg: for<'a> ExInstantiable<
+                StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>,
+            >,
             Return = T::ReturnRustType,
         >,
     >,
@@ -207,7 +209,7 @@ impl ApplyList for () {
         assert!(args.is_empty());
         for position in 0..number_rows {
             if valid(position) {
-                let mut out_arg:  <Builder::OutArg as ExInstantiable>::StackType<'_> =
+                let mut out_arg: <Builder::OutArg as ExInstantiable>::StackType<'_> =
                     builder.get_out_arg(position);
                 let result = invoke(position, (), &mut out_arg);
                 drop(out_arg);

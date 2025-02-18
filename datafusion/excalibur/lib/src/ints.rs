@@ -90,9 +90,7 @@ where
     type OutArg = ();
     type Return = T::Native;
 
-    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {
-        ()
-    }
+    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {}
 
     fn append(&mut self, fn_ret: T::Native) -> Result<()> {
         self.append_value(fn_ret);

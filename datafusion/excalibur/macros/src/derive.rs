@@ -173,24 +173,21 @@ fn implement_arg_type(ty: &Type) -> Result<Type> {
 }
 
 fn implement_out_arg_type(ty: &Type) -> Result<Type> {
-    match ty {
-        Type::Reference(type_reference) => {
-            if type_reference.mutability.is_some() && type_reference.lifetime.is_none() {
-                let referred = &type_reference.elem;
-                if let Type::ImplTrait(impl_trait) = &**referred {
-                    if impl_trait.bounds.len() == 1 {
-                        if let TypeParamBound::Trait(tr) = &impl_trait.bounds[0] {
-                            if let TraitBoundModifier::None = tr.modifier {
-                                return Ok(force_type::<Type>(
-                                    parse_quote! { FindExOutArgType<dyn #tr> },
-                                ));
-                            }
+    if let Type::Reference(type_reference) = ty {
+        if type_reference.mutability.is_some() && type_reference.lifetime.is_none() {
+            let referred = &type_reference.elem;
+            if let Type::ImplTrait(impl_trait) = &**referred {
+                if impl_trait.bounds.len() == 1 {
+                    if let TypeParamBound::Trait(tr) = &impl_trait.bounds[0] {
+                        if let TraitBoundModifier::None = tr.modifier {
+                            return Ok(force_type::<Type>(
+                                parse_quote! { FindExOutArgType<dyn #tr> },
+                            ));
                         }
                     }
                 }
             }
         }
-        _ => {}
     }
     Err(Error::new(
         ty.span(),

@@ -18,18 +18,18 @@
 use crate::arg_type_list::ExArgTypeList;
 use crate::bridge::ExcaliburScalarUdf;
 // use crate::ret_type::ExRetType;
+use crate::builder::ExFullResultType;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
 use datafusion_expr::{Signature, Volatility};
 use datafusion_expr_common::signature::Coercion;
-use crate::builder::ExFullResultType;
 
 pub fn create_excalibur_signature<T>() -> ExcaliburSignature
 where
     T: ExcaliburScalarUdf,
     T::ArgumentRustTypes: ExArgTypeList,
     // T::ReturnRustType: ExRetType,
-    (T::OutArgRustType, T::ReturnRustType): ExFullResultType
+    (T::OutArgRustType, T::ReturnRustType): ExFullResultType,
 {
     ExcaliburSignature {
         signature: Signature::coercible(
@@ -40,7 +40,8 @@ where
                 .collect(),
             Volatility::Immutable,
         ),
-        return_type: <(T::OutArgRustType, T::ReturnRustType) as ExFullResultType>::data_type(),
+        return_type:
+            <(T::OutArgRustType, T::ReturnRustType) as ExFullResultType>::data_type(),
     }
 }
 

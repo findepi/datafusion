@@ -17,10 +17,10 @@
 
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 // use crate::ret_type::ExRetType;
+use crate::__private::ExInstantiable;
 use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
-use crate::__private::ExInstantiable;
 // impl<T> ExRetType for Option<T>
 // where
 //     T: ExRetType,
@@ -54,12 +54,15 @@ pub struct ResultBuilderWithOptionSupport<Delegate> {
 
 impl<Delegate> ExArrayBuilder for ResultBuilderWithOptionSupport<Delegate>
 where
-    Delegate: ExArrayBuilder<OutArg = ()>
+    Delegate: ExArrayBuilder<OutArg = ()>,
 {
     type OutArg = Delegate::OutArg;
     type Return = Option<Delegate::Return>;
 
-    fn get_out_arg(&mut self, position: usize) -> <Self::OutArg as ExInstantiable>::StackType<'_> {
+    fn get_out_arg(
+        &mut self,
+        position: usize,
+    ) -> <Self::OutArg as ExInstantiable>::StackType<'_> {
         self.delegate.get_out_arg(position)
     }
 
