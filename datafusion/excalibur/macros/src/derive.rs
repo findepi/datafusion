@@ -56,6 +56,7 @@ fn common_imports() -> TokenStream {
         use ::datafusion_excalibur::__private::ExcaliburScalarUdf;
         use ::datafusion_excalibur::__private::FindExArgType;
         use ::datafusion_excalibur::__private::ScalarUDFImpl;
+        use ::datafusion_excalibur::__private::ApplyList;
         use ::datafusion_excalibur::__private::create_excalibur_scalar_udf;
         use ::std::ops::Deref;
         use ::std::sync::Arc;
@@ -96,12 +97,12 @@ fn struct_definition(
             const SQL_NAME: &'static str = #sql_function_name;
             const RUST_ARGUMENT_COUNT: u8 = #rust_arg_count;
             const SQL_ARGUMENT_COUNT: u8 = #rust_arg_count; // TODO out args not supported yet
-            type ArgumentRustTypes<'a> = #rust_arg_type_list;
+            type ArgumentRustTypes = #rust_arg_type_list;
             type OutArgRustType = (); // TODO out args not supported yet
             type ReturnRustType = #rust_return_type;
 
             fn invoke(
-                regular_args: Self::ArgumentRustTypes<'_>,
+                regular_args: <Self::ArgumentRustTypes as ApplyList>::StackType<'_>,
                 out_arg: &mut Self::OutArgRustType,
             ) -> Self::ReturnRustType {
                 // TODO real invoke body
@@ -139,7 +140,7 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
             if type_reference.mutability.is_none() && type_reference.lifetime.is_none() {
                 let referred = &type_reference.elem;
                 return Ok((
-                    force_type::<Type>(parse_quote! { FindExArgType<'a, dyn AsRef<#referred>> }),
+                    force_type::<Type>(parse_quote! { FindExArgType<'static, dyn AsRef<#referred>> }),
                     quote! { #arg_name },
                     quote! { #arg_name.as_ref() },
                 ));
@@ -148,7 +149,7 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
 
         Type::Path(_) => {
             return Ok((
-                force_type::<Type>(parse_quote! { FindExArgType<'a, #ty> }),
+                force_type::<Type>(parse_quote! { FindExArgType<'static, #ty> }),
                 quote! { #arg_name },
                 quote! { #arg_name },
             ));
