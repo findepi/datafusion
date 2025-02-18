@@ -58,9 +58,13 @@ where
 }
 
 macro_rules! primitive_result_type {
-    ($native_type:ty, $arrow_primitive_type:ty) => {
+    ($native_type:ty, $arrow_primitive_type:ty, $dt_option_name:ident) => {
         impl ExFullResultType for ((), $native_type) {
             type BuilderType = PrimitiveBuilder<$arrow_primitive_type>;
+
+            fn data_type() -> DataType {
+                DataType::$dt_option_name
+            }
 
             fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
                 Self::BuilderType::with_capacity(number_rows)
@@ -69,15 +73,15 @@ macro_rules! primitive_result_type {
     };
 }
 
-primitive_result_type!(i8, Int8Type);
-primitive_result_type!(i16, Int16Type);
-primitive_result_type!(i32, Int32Type);
-primitive_result_type!(i64, Int64Type);
+primitive_result_type!(i8, Int8Type, Int8);
+primitive_result_type!(i16, Int16Type, Int16);
+primitive_result_type!(i32, Int32Type, Int32);
+primitive_result_type!(i64, Int64Type, Int64);
 
-primitive_result_type!(u8, UInt8Type);
-primitive_result_type!(u16, UInt16Type);
-primitive_result_type!(u32, UInt32Type);
-primitive_result_type!(u64, UInt64Type);
+primitive_result_type!(u8, UInt8Type, UInt8);
+primitive_result_type!(u16, UInt16Type, UInt16);
+primitive_result_type!(u32, UInt32Type, UInt32);
+primitive_result_type!(u64, UInt64Type, UInt64);
 
 impl<T> ExArrayBuilder for PrimitiveBuilder<T>
 where
@@ -86,9 +90,13 @@ where
     type OutArg = ();
     type Return = T::Native;
 
-    fn get_out_arg(&mut self, _position: usize) {}
+    fn get_out_arg(&mut self, _position: usize) -> &mut Self::OutArg {
+        static mut EMPTY_TUPLE: () = ();
+        // SAFETY: the empty tuple has no mutable interior anyway
+        unsafe { &mut EMPTY_TUPLE }
+    }
 
-    fn append(&mut self, _out_arg: (), fn_ret: T::Native) -> Result<()> {
+    fn append(&mut self, fn_ret: T::Native) -> Result<()> {
         self.append_value(fn_ret);
         Ok(())
     }

@@ -19,7 +19,7 @@ use crate::arg_type_list::ExArgTypeList;
 use crate::bridge::ExcaliburScalarUdf;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::invoke::{excalibur_invoke, ApplyList};
-use crate::ret_type::ExRetType;
+// use crate::ret_type::ExRetType;
 use crate::signature::{create_excalibur_signature, ExcaliburSignature};
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
@@ -34,7 +34,7 @@ where
     T: ExcaliburScalarUdf + Send + Sync + 'static,
     T::ArgumentRustTypes: ExArgTypeList,
     T::ArgumentRustTypes: ApplyList,
-    T::ReturnRustType: ExRetType,
+    //T::ReturnRustType: ExRetType,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
             OutArg = T::OutArgRustType,

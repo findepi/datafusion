@@ -21,7 +21,7 @@ use crate::strings::to_camel_case;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::spanned::Spanned;
-use syn::{parse_quote, Error, Result, Type};
+use syn::{parse_quote, Error, Result, TraitBoundModifier, Type, TypeParamBound};
 
 pub fn derive(attributes: EFAttributes, input: InputFnInfo) -> Result<TokenStream> {
     let orig_rust_function_name = &input.name;
@@ -55,6 +55,7 @@ fn common_imports() -> TokenStream {
         use ::datafusion_excalibur::__private::ExInstantiable;
         use ::datafusion_excalibur::__private::ExcaliburScalarUdf;
         use ::datafusion_excalibur::__private::FindExArgType;
+        use ::datafusion_excalibur::__private::FindExOutArgType;
         use ::datafusion_excalibur::__private::ScalarUDFImpl;
         use ::datafusion_excalibur::__private::create_excalibur_scalar_udf;
         use ::std::ops::Deref;
@@ -70,19 +71,34 @@ fn struct_definition(
 ) -> Result<(Ident, TokenStream)> {
     let orig_rust_function_name = &input.name;
     let impl_struct_name = format_ident!("{}", to_camel_case(sql_function_name));
-    let rust_arg_count = input.args.len() as u8;
+
+    let (out_arg_type, out_arg_name, out_arg_invoke_expr) =
+        if let Some(out_arg) = &input.out_arg {
+            let impl_type = implement_out_arg_type(&out_arg.ty)?;
+            let out_arg_name = out_arg.name.clone();
+            let invoke_arg = quote! { #out_arg_name };
+            (impl_type, out_arg_name, invoke_arg)
+        } else {
+            let unit_type = force_type::<Type>(parse_quote! { () });
+            (unit_type, format_ident!("_"), quote! {})
+        };
+
     let (rust_arg_type_list, destruct_args, invoke_args) = input.args.iter().try_rfold(
         (
             force_type::<Type>(parse_quote! { () }),
             quote! { () },
-            quote! {},
+            quote! { #out_arg_invoke_expr },
         ),
         |(type_list, destruct_args, invoke_args), arg| -> Result<_> {
-            let (impl_type, destruct, invoke) = implement_arg(arg)?;
+            let ArgImplementation {
+                impl_type,
+                destruct_expr,
+                invoke_expr,
+            } = implement_arg(arg)?;
             Ok((
                 force_type::<Type>(parse_quote! { (#impl_type, #type_list) }),
-                quote! { (#destruct, #destruct_args) },
-                quote! { #invoke, #invoke_args },
+                quote! { (#destruct_expr, #destruct_args) },
+                quote! { #invoke_expr, #invoke_args },
             ))
         },
     )?;
@@ -93,15 +109,13 @@ fn struct_definition(
 
         impl ExcaliburScalarUdf for #impl_struct_name {
             const SQL_NAME: &'static str = #sql_function_name;
-            const RUST_ARGUMENT_COUNT: u8 = #rust_arg_count;
-            const SQL_ARGUMENT_COUNT: u8 = #rust_arg_count; // TODO out args not supported yet
             type ArgumentRustTypes = #rust_arg_type_list;
-            type OutArgRustType = (); // TODO out args not supported yet
+            type OutArgRustType = #out_arg_type;
             type ReturnRustType = #rust_return_type;
 
             fn invoke(
                 regular_args: <Self::ArgumentRustTypes as ExInstantiable>::StackType<'_>,
-                out_arg: &mut Self::OutArgRustType,
+                #out_arg_name: &mut Self::OutArgRustType,
             ) -> Self::ReturnRustType {
                 // TODO real invoke body
                 let #destruct_args = regular_args;
@@ -120,29 +134,61 @@ fn sql_function_name(attributes: &EFAttributes, input: &InputFnInfo) -> String {
     }
 }
 
-fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
-    let ty = &arg.ty;
+fn implement_arg(arg: &NameType) -> Result<ArgImplementation> {
+    let impl_type = implement_arg_type(&arg.ty)?;
     let arg_name = &arg.name;
+    Ok(ArgImplementation {
+        impl_type,
+        destruct_expr: quote! { #arg_name },
+        invoke_expr: quote! { #arg_name },
+    })
+}
+
+struct ArgImplementation {
+    impl_type: Type,
+    destruct_expr: TokenStream,
+    invoke_expr: TokenStream,
+}
+
+fn implement_arg_type(ty: &Type) -> Result<Type> {
     match ty {
         Type::Reference(type_reference) => {
             if type_reference.mutability.is_none() && type_reference.lifetime.is_none() {
                 let referred = &type_reference.elem;
-                return Ok((
-                    force_type::<Type>(
-                        parse_quote! { FindExArgType<dyn AsRef<#referred>> },
-                    ),
-                    quote! { #arg_name },
-                    quote! { #arg_name },
+                return Ok(force_type::<Type>(
+                    parse_quote! { FindExArgType<dyn AsRef<#referred>> },
                 ));
             }
         }
 
         Type::Path(_) => {
-            return Ok((
-                force_type::<Type>(parse_quote! { FindExArgType<#ty> }),
-                quote! { #arg_name },
-                quote! { #arg_name },
-            ));
+            return Ok(force_type::<Type>(parse_quote! { FindExArgType<#ty> }));
+        }
+        _ => {}
+    }
+    Err(Error::new(
+        ty.span(),
+        "Function argument has unsupported type for use with Excalibur",
+    ))
+}
+
+fn implement_out_arg_type(ty: &Type) -> Result<Type> {
+    match ty {
+        Type::Reference(type_reference) => {
+            if type_reference.mutability.is_some() && type_reference.lifetime.is_none() {
+                let referred = &type_reference.elem;
+                if let Type::ImplTrait(impl_trait) = &**referred {
+                    if impl_trait.bounds.len() == 1 {
+                        if let TypeParamBound::Trait(tr) = &impl_trait.bounds[0] {
+                            if let TraitBoundModifier::None = tr.modifier {
+                                return Ok(force_type::<Type>(
+                                    parse_quote! { FindExOutArgType<dyn #tr> },
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
         }
         _ => {}
     }

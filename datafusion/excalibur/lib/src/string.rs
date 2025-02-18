@@ -17,13 +17,15 @@
 
 use crate::arg_type::{ExArgType, ExFindImplementation, ExInstantiable};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
-use arrow::array::{Array, StringArray, StringViewArray};
+use crate::ret_type::{ExFindOutImplementation};
+use arrow::array::{Array, ArrayRef, StringArray, StringBuilder, StringViewArray, StringViewBuilder};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::{as_string_array, as_string_view_array};
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
 use datafusion_common::{internal_err, Result};
 use datafusion_expr::ColumnarValue;
+use crate::builder::{ExArrayBuilder, ExFullResultType};
 
 impl ExFindImplementation for dyn AsRef<str> {
     type Type = RefStrArgType;
@@ -102,5 +104,50 @@ impl<'a> ExArrayReader<'a> for &'a ScalarString {
 
     fn get(&self, _position: usize) -> Self::ValueType {
         self.0.as_deref().unwrap()
+    }
+}
+
+impl ExFindOutImplementation for dyn std::fmt::Write {
+    type Type = StringWriter;
+}
+
+pub struct StringWriter;
+
+// impl ExRetType for StringWriter {
+//     fn data_type() -> DataType {
+//         DataType::Utf8View
+//     }
+// }
+
+impl ExFullResultType for (StringWriter, Result<()>) {
+    type BuilderType = StringViewBuilder;
+
+    fn data_type() -> DataType {
+        DataType::Utf8View
+    }
+
+    fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
+        StringViewBuilder::with_capacity(number_rows * 10)
+    }
+}
+
+impl ExArrayBuilder for StringViewBuilder {
+    type OutArg = StringWriter;
+    type Return = Result<()>;
+
+    fn get_out_arg(&mut self, position: usize) -> &mut Self::OutArg {
+        todo!()
+    }
+
+    fn append(&mut self, fn_ret: Self::Return) -> Result<()> {
+        todo!()
+    }
+
+    fn append_null(&mut self) -> Result<()> {
+        todo!()
+    }
+
+    fn build(self) -> Result<ArrayRef> {
+        todo!()
     }
 }

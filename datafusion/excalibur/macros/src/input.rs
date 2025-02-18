@@ -22,6 +22,7 @@ use syn::{Error, FnArg, ItemFn, Pat, Result, ReturnType, Type};
 pub struct InputFnInfo {
     pub name: Ident,
     pub args: Vec<NameType>,
+    pub out_arg: Option<NameType>,
     pub return_ty: Type,
 }
 
@@ -48,12 +49,29 @@ impl InputFnInfo {
             ));
         }
 
-        let args = sig
-            .inputs
-            .iter()
+        let mut inputs: Vec<_> = sig.inputs.iter().collect();
+        let mut out_arg = None;
+        if let Some(last) = inputs.last() {
+            if let FnArg::Typed(typed) = last {
+                if let Pat::Ident(ident) = &*typed.pat {
+                    if let Type::Reference(type_reference) = &*typed.ty {
+                        if type_reference.mutability.is_some() {
+                            out_arg = Some(NameType {
+                                name: ident.ident.clone(),
+                                ty: (*typed.ty).clone(),
+                            });
+                            inputs.pop();
+                        }
+                    }
+                }
+            }
+        }
+
+        let args = inputs
+            .into_iter()
             .map(|arg| {
                 if let FnArg::Typed(typed) = arg {
-                    if let Pat::Ident(ref ident) = *typed.pat {
+                    if let Pat::Ident(ident) = &*typed.pat {
                         if typed.attrs.is_empty() {
                             return Ok(NameType {
                                 name: ident.ident.clone(),
@@ -79,6 +97,7 @@ impl InputFnInfo {
         Ok(InputFnInfo {
             name: sig.ident,
             args,
+            out_arg,
             return_ty: (*return_ty).to_owned(),
         })
     }

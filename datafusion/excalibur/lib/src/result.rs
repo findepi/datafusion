@@ -16,19 +16,19 @@
 // under the License.
 
 use crate::builder::{ExArrayBuilder, ExFullResultType};
-use crate::ret_type::ExRetType;
+// use crate::ret_type::ExRetType;
 use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
 
-impl<T> ExRetType for Result<T>
-where
-    T: ExRetType,
-{
-    fn data_type() -> DataType {
-        T::data_type()
-    }
-}
+// impl<T> ExRetType for Result<T>
+// where
+//     T: ExRetType,
+// {
+//     fn data_type() -> DataType {
+//         T::data_type()
+//     }
+// }
 
 impl<T> ExFullResultType for ((), Result<T>)
 where
@@ -36,6 +36,10 @@ where
 {
     type BuilderType =
         ResultBuilderWithResultSupport<<((), T) as ExFullResultType>::BuilderType>;
+
+    fn data_type() -> DataType {
+        <((), T) as ExFullResultType>::data_type()
+    }
 
     fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
         Self::BuilderType {
@@ -55,12 +59,12 @@ where
     type OutArg = Delegate::OutArg;
     type Return = Result<Delegate::Return>;
 
-    fn get_out_arg(&mut self, position: usize) -> Self::OutArg {
+    fn get_out_arg(&mut self, position: usize) -> &mut Self::OutArg {
         self.delegate.get_out_arg(position)
     }
 
-    fn append(&mut self, out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
-        self.delegate.append(out_arg, fn_ret?)
+    fn append(&mut self, fn_ret: Self::Return) -> Result<()> {
+        self.delegate.append(fn_ret?)
     }
 
     fn append_null(&mut self) -> Result<()> {

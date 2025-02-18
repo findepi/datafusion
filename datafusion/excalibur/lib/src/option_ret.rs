@@ -16,26 +16,30 @@
 // under the License.
 
 use crate::builder::{ExArrayBuilder, ExFullResultType};
-use crate::ret_type::ExRetType;
+// use crate::ret_type::ExRetType;
 use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
 
-impl<T> ExRetType for Option<T>
-where
-    T: ExRetType,
-{
-    fn data_type() -> DataType {
-        T::data_type()
-    }
-}
+// impl<T> ExRetType for Option<T>
+// where
+//     T: ExRetType,
+// {
+//     fn data_type() -> DataType {
+//         T::data_type()
+//     }
+// }
 
 impl<T> ExFullResultType for ((), Option<T>)
 where
-    ((), T): ExFullResultType,
+    ((), T): ExFullResultType<BuilderType: ExArrayBuilder<OutArg = ()>>,
 {
     type BuilderType =
         ResultBuilderWithOptionSupport<<((), T) as ExFullResultType>::BuilderType>;
+
+    fn data_type() -> DataType {
+        <((), T) as ExFullResultType>::data_type()
+    }
 
     fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
         Self::BuilderType {
@@ -50,18 +54,18 @@ pub struct ResultBuilderWithOptionSupport<Delegate> {
 
 impl<Delegate> ExArrayBuilder for ResultBuilderWithOptionSupport<Delegate>
 where
-    Delegate: ExArrayBuilder,
+    Delegate: ExArrayBuilder<OutArg = ()>
 {
     type OutArg = Delegate::OutArg;
     type Return = Option<Delegate::Return>;
 
-    fn get_out_arg(&mut self, position: usize) -> Self::OutArg {
+    fn get_out_arg(&mut self, position: usize) -> &mut Self::OutArg {
         self.delegate.get_out_arg(position)
     }
 
-    fn append(&mut self, out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
+    fn append(&mut self, fn_ret: Self::Return) -> Result<()> {
         if let Some(ret) = fn_ret {
-            self.delegate.append(out_arg, ret)
+            self.delegate.append(ret)
         } else {
             self.delegate.append_null()
         }

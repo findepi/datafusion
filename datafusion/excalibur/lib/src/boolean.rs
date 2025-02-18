@@ -41,18 +41,27 @@ impl<'a> ExArrayReader<'a> for &'a BooleanArray {
 impl ExFullResultType for ((), bool) {
     type BuilderType = BooleanBuilder;
 
+    fn data_type() -> DataType {
+        DataType::Boolean
+    }
+
     fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
         Self::BuilderType::with_capacity(number_rows)
     }
 }
 
+
 impl ExArrayBuilder for BooleanBuilder {
     type OutArg = ();
     type Return = bool;
 
-    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {}
+    fn get_out_arg(&mut self, _position: usize) -> &mut Self::OutArg {
+        static mut EMPTY_TUPLE: () = ();
+        // SAFETY: the empty tuple has no mutable interior anyway
+        unsafe { &mut EMPTY_TUPLE }
+    }
 
-    fn append(&mut self, _out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()> {
+    fn append(&mut self, fn_ret: Self::Return) -> Result<()> {
         self.append_value(fn_ret);
         Ok(())
     }

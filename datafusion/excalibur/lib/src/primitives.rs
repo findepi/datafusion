@@ -52,10 +52,10 @@ macro_rules! primitive_type {
             }
         }
 
-        impl $crate::ret_type::ExRetType for $native_type {
-            fn data_type() -> DataType {
-                DataType::$dt_option_name
-            }
-        }
+        // impl $crate::ret_type::ExRetType for $native_type {
+        //     fn data_type() -> DataType {
+        //         DataType::$dt_option_name
+        //     }
+        // }
     };
 }

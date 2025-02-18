@@ -37,7 +37,7 @@ where
 {
     let number_rows = args.number_rows;
     let args = args.args;
-    assert_eq!(args.len(), T::SQL_ARGUMENT_COUNT as usize);
+    assert_eq!(args.len(), T::ArgumentRustTypes::ARITY);
     let args = VecDeque::from(args);
 
     let mut builder =
@@ -60,6 +60,8 @@ where
 }
 
 pub trait ApplyList: ExInstantiable {
+    const ARITY: usize;
+
     fn apply<Builder, Valid, Invoke>(
         args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -90,6 +92,8 @@ where
     Head: ExArgType,
     Tail: ApplyList,
 {
+    const ARITY: usize = 1 + Tail::ARITY;
+
     fn apply<Builder, Valid, Invoke>(
         mut args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -186,6 +190,8 @@ impl ExInstantiable for () {
 }
 
 impl ApplyList for () {
+    const ARITY: usize = 0;
+    
     fn apply<Builder, Valid, Invoke>(
         args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -205,9 +211,9 @@ impl ApplyList for () {
         assert!(args.is_empty());
         for position in 0..number_rows {
             if valid(position) {
-                let mut out_arg: Builder::OutArg = builder.get_out_arg(position);
-                let result = invoke(position, (), &mut out_arg);
-                builder.append(out_arg, result)?;
+                let out_arg: &mut Builder::OutArg = builder.get_out_arg(position);
+                let result = invoke(position, (), out_arg);
+                builder.append(result)?;
             } else {
                 builder.append_null()?;
             }

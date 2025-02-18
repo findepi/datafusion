@@ -15,8 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
+use crate::arg_type::ExArgType;
 use arrow::datatypes::DataType;
 
-pub trait ExRetType {
-    fn data_type() -> DataType;
+// pub trait ExRetType {
+//     fn data_type() -> DataType;
+// }
+
+pub type FindExOutArgType<T> = <T as ExFindOutImplementation>::Type;
+
+pub trait ExFindOutImplementation {
+    type Type;
 }

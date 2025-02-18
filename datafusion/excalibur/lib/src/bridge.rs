@@ -23,12 +23,6 @@ pub trait ExcaliburScalarUdf {
     // for example "my_function"
     const SQL_NAME: &'static str;
 
-    // for example 2 for my_function(a, b)
-    const RUST_ARGUMENT_COUNT: u8;
-
-    // for example 2 for my_function(a, b). This currently needs to be te same as RUST_ARGUMENT_COUNT
-    const SQL_ARGUMENT_COUNT: u8;
-
     // for example
     // - (i32, (u64, ()) for my_function(a: i32, b: u64)
     // - (i32, (u64, ()) for my_function(a: i32, b: u64, out: &mut X)

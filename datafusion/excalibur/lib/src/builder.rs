@@ -16,10 +16,14 @@
 // under the License.
 
 use arrow::array::ArrayRef;
+use arrow::datatypes::DataType;
 use datafusion_common::Result;
 
 pub trait ExFullResultType {
     type BuilderType: ExArrayBuilder;
+
+     fn data_type() -> DataType;
+
     fn builder_with_capacity(number_rows: usize) -> Self::BuilderType;
 }
 
@@ -27,9 +31,9 @@ pub trait ExArrayBuilder {
     type OutArg;
     type Return;
 
-    fn get_out_arg(&mut self, position: usize) -> Self::OutArg;
+    fn get_out_arg(&mut self, position: usize) -> &mut Self::OutArg;
 
-    fn append(&mut self, out_arg: Self::OutArg, fn_ret: Self::Return) -> Result<()>;
+    fn append(&mut self, fn_ret: Self::Return) -> Result<()>;
 
     fn append_null(&mut self) -> Result<()>;
 
