@@ -115,7 +115,7 @@ fn struct_definition(
 
             fn invoke(
                 regular_args: <Self::ArgumentRustTypes as ExInstantiable>::StackType<'_>,
-                #out_arg_name: &mut Self::OutArgRustType,
+                #out_arg_name: &mut <Self::OutArgRustType as ExInstantiable>::StackType<'_>,
             ) -> Self::ReturnRustType {
                 // TODO real invoke body
                 let #destruct_args = regular_args;

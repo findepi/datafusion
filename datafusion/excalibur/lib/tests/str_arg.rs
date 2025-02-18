@@ -62,7 +62,7 @@ fn test_invoke_string_array() {
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 3,
-            return_type: &DataType::Utf8,
+            return_type: &DataType::UInt64,
         })
         .unwrap()
     else {
@@ -85,7 +85,7 @@ fn test_invoke_string_view_array() {
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 3,
-            return_type: &DataType::Utf8,
+            return_type: &DataType::UInt64,
         })
         .unwrap()
     else {
@@ -108,7 +108,7 @@ fn test_invoke_array_with_nulls() {
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 3,
-            return_type: &DataType::Utf8,
+            return_type: &DataType::UInt64,
         })
         .unwrap()
     else {
@@ -132,7 +132,7 @@ fn test_invoke_scalar_utf8() {
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 1,
-            return_type: &DataType::Utf8,
+            return_type: &DataType::UInt64,
         })
         .unwrap()
     else {
@@ -153,7 +153,7 @@ fn test_invoke_scalar_utf8view() {
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 1,
-            return_type: &DataType::Utf8,
+            return_type: &DataType::UInt64,
         })
         .unwrap()
     else {
@@ -172,7 +172,7 @@ fn test_invoke_scalar_null() {
         .invoke_with_args(ScalarFunctionArgs {
             args: invoke_args,
             number_rows: 1,
-            return_type: &DataType::Utf8,
+            return_type: &DataType::UInt64,
         })
         .unwrap()
     else {

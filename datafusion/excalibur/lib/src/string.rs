@@ -20,13 +20,16 @@ use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use crate::ret_type::ExFindOutImplementation;
 use crate::ValuePresence;
-use arrow::array::{Array, ArrayRef, StringArray, StringBuilder, StringViewArray};
+use arrow::array::{
+    Array, ArrayBuilder, ArrayRef, StringArray, StringBuilder, StringViewArray,
+};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::{as_string_array, as_string_view_array};
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
 use datafusion_common::{internal_err, Result};
 use datafusion_expr::ColumnarValue;
+use std::sync::Arc;
 
 impl ExFindImplementation for dyn AsRef<str> {
     type Type = RefStrArgType;
@@ -118,7 +121,7 @@ impl ExFullResultType for (StringWriter, Result<ValuePresence>) {
     type BuilderType = StringBuilder;
 
     fn data_type() -> DataType {
-        DataType::Utf8View
+        DataType::Utf8
     }
 
     fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
@@ -154,14 +157,24 @@ impl ExArrayBuilder for StringBuilder {
     }
 
     fn append(&mut self, fn_ret: Self::Return) -> Result<()> {
-        todo!()
+        match fn_ret? {
+            ValuePresence::Value => {
+                // Data passed via the out arg
+                self.append_value("");
+            }
+            ValuePresence::Null => {
+                self.append_null();
+            }
+        }
+        Ok(())
     }
 
     fn append_null(&mut self) -> Result<()> {
-        todo!()
+        self.append_null();
+        Ok(())
     }
 
-    fn build(self) -> Result<ArrayRef> {
-        todo!()
+    fn build(mut self) -> Result<ArrayRef> {
+        Ok(Arc::new(self.finish()))
     }
 }
