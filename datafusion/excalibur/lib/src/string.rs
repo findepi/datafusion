@@ -27,7 +27,7 @@ use datafusion_expr::ColumnarValue;
 use std::ptr::NonNull;
 
 impl ExFindImplementation for dyn AsRef<str> {
-    type Type<'a> = RefStrArgType;
+    type Type = RefStrArgType;
 }
 
 pub struct RefStrArgType;
