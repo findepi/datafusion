@@ -15,11 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::ExArgType;
 use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::primitive_type;
 use crate::reader::ExArrayReader;
-use crate::ret_type::ExRetType;
 use arrow::array::{Array, ArrayRef, BooleanArray, BooleanBuilder};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::as_boolean_array;

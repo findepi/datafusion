@@ -29,7 +29,7 @@ pub trait ExArgType: ExInstantiable {
 
     fn decode(
         arg: ColumnarValue,
-        consumer: impl for <'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
+        consumer: impl for<'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
     ) -> Result<()>;
 }
 

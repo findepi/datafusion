@@ -24,7 +24,7 @@ use datafusion_expr::ColumnarValue;
 use datafusion_expr::ScalarFunctionArgs;
 use std::collections::VecDeque;
 
-pub fn excalibur_invoke<'a, T>(args: ScalarFunctionArgs, _: &'a()) -> Result<ColumnarValue>
+pub fn excalibur_invoke<T>(args: ScalarFunctionArgs, _: &()) -> Result<ColumnarValue>
 where
     T: ExcaliburScalarUdf,
     T::ArgumentRustTypes: ApplyList,
@@ -70,7 +70,11 @@ pub trait ApplyList: ExInstantiable {
     where
         Builder: ExArrayBuilder,
         Valid: Fn(usize) -> bool,
-        Invoke: for <'a> Fn(usize, Self::StackType<'a>, &mut Builder::OutArg) -> Builder::Return;
+        Invoke: for<'a> Fn(
+            usize,
+            Self::StackType<'a>,
+            &mut Builder::OutArg,
+        ) -> Builder::Return;
 }
 
 impl<Head, Tail> ExInstantiable for (Head, Tail)
@@ -96,7 +100,11 @@ where
     where
         Builder: ExArrayBuilder,
         Valid: Fn(usize) -> bool,
-        Invoke: for <'a> Fn(usize, Self::StackType<'a>, &mut Builder::OutArg) -> Builder::Return,
+        Invoke: for<'a> Fn(
+            usize,
+            Self::StackType<'a>,
+            &mut Builder::OutArg,
+        ) -> Builder::Return,
     {
         let arg = args.pop_front().unwrap();
         let continuation = ApplyListHeadConsumer {
@@ -129,7 +137,11 @@ where
     Tail: ApplyList,
     Builder: ExArrayBuilder,
     Valid: Fn(usize) -> bool,
-    Invoke: for <'a> Fn(usize, (Head::StackType<'a>, Tail::StackType<'a>), &mut Builder::OutArg) -> Builder::Return,
+    Invoke: for<'a> Fn(
+        usize,
+        (Head::StackType<'a>, Tail::StackType<'a>),
+        &mut Builder::OutArg,
+    ) -> Builder::Return,
 {
     type ValueType<'a> = Head::StackType<'a>;
 
@@ -156,7 +168,10 @@ where
                 // FIXME: here we succumb to the borrow checker
                 // SAFETY: the Invoke  is guaranteed not to capture the reference it is given
                 let record = unsafe {
-                    std::mem::transmute::<(Head::StackType<'_>, Tail::StackType<'_>), (Head::StackType<'_>, Tail::StackType<'_>)>(record)
+                    std::mem::transmute::<
+                        (Head::StackType<'_>, Tail::StackType<'_>),
+                        (Head::StackType<'_>, Tail::StackType<'_>),
+                    >(record)
                 };
                 invoke(position, record, out_arg)
                 // invoke(position, (head_arg, tail_args), out_arg)
@@ -181,7 +196,11 @@ impl ApplyList for () {
     where
         Builder: ExArrayBuilder,
         Valid: Fn(usize) -> bool,
-        Invoke: for <'a> Fn(usize, Self::StackType<'a>, &mut Builder::OutArg) -> Builder::Return,
+        Invoke: for<'a> Fn(
+            usize,
+            Self::StackType<'a>,
+            &mut Builder::OutArg,
+        ) -> Builder::Return,
     {
         assert!(args.is_empty());
         for position in 0..number_rows {

@@ -24,7 +24,6 @@ use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
 use datafusion_common::{internal_err, Result};
 use datafusion_expr::ColumnarValue;
-use std::ptr::NonNull;
 
 impl ExFindImplementation for dyn AsRef<str> {
     type Type = RefStrArgType;
@@ -43,7 +42,7 @@ impl ExArgType for RefStrArgType {
 
     fn decode(
         arg: ColumnarValue,
-        consumer: impl for <'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
+        consumer: impl for<'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
     ) -> Result<()> {
         match arg {
             ColumnarValue::Array(array) => match array.data_type() {
@@ -81,27 +80,27 @@ impl<'a> ExArrayReader<'a> for &'a StringArray {
 }
 
 impl<'a> ExArrayReader<'a> for &'a StringViewArray {
-      type ValueType = &'a str;
+    type ValueType = &'a str;
 
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(&self, position)
     }
 
     fn get(&self, position: usize) -> Self::ValueType {
-        (self.value(position).into())
+        self.value(position)
     }
 }
 
 struct ScalarString(Option<String>);
 
 impl<'a> ExArrayReader<'a> for &'a ScalarString {
-   type ValueType = &'a str;
+    type ValueType = &'a str;
 
     fn is_valid(&self, _position: usize) -> bool {
         self.0.is_some()
     }
 
     fn get(&self, _position: usize) -> Self::ValueType {
-        (self.0.as_deref().unwrap().into())
+        self.0.as_deref().unwrap()
     }
 }

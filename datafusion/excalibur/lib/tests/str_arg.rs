@@ -26,7 +26,7 @@ use datafusion_expr::{
 use std::sync::Arc;
 
 #[excalibur_function]
-fn character_length(s:  &str) -> u64 {
+fn character_length(s: &str) -> u64 {
     s.chars().count() as u64
 }
 

@@ -21,8 +21,7 @@ use crate::strings::to_camel_case;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::spanned::Spanned;
-use syn::token::Token;
-use syn::{parse_quote, Error, Result, TraitBoundModifier, Type, TypeTuple};
+use syn::{parse_quote, Error, Result, Type};
 
 pub fn derive(attributes: EFAttributes, input: InputFnInfo) -> Result<TokenStream> {
     let orig_rust_function_name = &input.name;
@@ -72,22 +71,21 @@ fn struct_definition(
     let orig_rust_function_name = &input.name;
     let impl_struct_name = format_ident!("{}", to_camel_case(sql_function_name));
     let rust_arg_count = input.args.len() as u8;
-    let (rust_arg_type_list, destruct_args, invoke_args) =
-        input.args.iter().enumerate().try_rfold(
-            (
-                force_type::<Type>(parse_quote! { () }),
-                quote! { () },
-                quote! {},
-            ),
-            |(type_list, destruct_args, invoke_args), (pos, arg)| -> Result<_> {
-                let (impl_type, destruct, invoke) = implement_arg(arg)?;
-                Ok((
-                    force_type::<Type>(parse_quote! { (#impl_type, #type_list) }),
-                    quote! { (#destruct, #destruct_args) },
-                    quote! { #invoke, #invoke_args },
-                ))
-            },
-        )?;
+    let (rust_arg_type_list, destruct_args, invoke_args) = input.args.iter().try_rfold(
+        (
+            force_type::<Type>(parse_quote! { () }),
+            quote! { () },
+            quote! {},
+        ),
+        |(type_list, destruct_args, invoke_args), arg| -> Result<_> {
+            let (impl_type, destruct, invoke) = implement_arg(arg)?;
+            Ok((
+                force_type::<Type>(parse_quote! { (#impl_type, #type_list) }),
+                quote! { (#destruct, #destruct_args) },
+                quote! { #invoke, #invoke_args },
+            ))
+        },
+    )?;
     let rust_return_type = &input.return_ty;
 
     let struct_definition = quote! {
@@ -122,16 +120,6 @@ fn sql_function_name(attributes: &EFAttributes, input: &InputFnInfo) -> String {
     }
 }
 
-fn new_arg_name(name: &Ident, pos: usize) -> Ident {
-    let base_name = name.to_string();
-    let sep = if base_name.ends_with(|c: char| c.is_ascii_digit()) {
-        "_"
-    } else {
-        ""
-    };
-    format_ident!("{}{}{}", base_name, sep, pos)
-}
-
 fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
     let ty = &arg.ty;
     let arg_name = &arg.name;
@@ -140,7 +128,9 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
             if type_reference.mutability.is_none() && type_reference.lifetime.is_none() {
                 let referred = &type_reference.elem;
                 return Ok((
-                    force_type::<Type>(parse_quote! { FindExArgType<dyn AsRef<#referred>> }),
+                    force_type::<Type>(
+                        parse_quote! { FindExArgType<dyn AsRef<#referred>> },
+                    ),
                     quote! { #arg_name },
                     quote! { #arg_name },
                 ));

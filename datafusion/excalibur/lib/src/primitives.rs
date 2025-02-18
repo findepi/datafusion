@@ -29,7 +29,9 @@ macro_rules! primitive_type {
 
             fn decode(
                 arg: datafusion_expr::ColumnarValue,
-                consumer: impl for <'a> $crate::reader::ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
+                consumer: impl for<'a> $crate::reader::ExArrayReaderConsumer<
+                    ValueType<'a> = Self::StackType<'a>,
+                >,
             ) -> Result<()> {
                 use datafusion_common::ScalarValue;
                 use datafusion_expr::ColumnarValue::*;
