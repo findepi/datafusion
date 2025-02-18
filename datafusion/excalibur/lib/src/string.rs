@@ -27,19 +27,13 @@ use datafusion_expr::ColumnarValue;
 use std::ptr::NonNull;
 
 impl ExFindImplementation for dyn AsRef<str> {
-    type Type<'a> = ImplAsRefStr;
+    type Type<'a> = RefStrArgType;
 }
 
-pub struct ImplAsRefStr(NonNull<str>);
+pub struct RefStrArgType;
 
-impl AsRef<str> for ImplAsRefStr {
-    fn as_ref(&self) -> &str {
-        unsafe { self.0.as_ref() }
-    }
-}
-
-impl ExArgType for ImplAsRefStr {
-    type StackType<'a> = ImplAsRefStr;
+impl ExArgType for RefStrArgType {
+    type StackType<'a> = &'a str;
 
     fn logical_type() -> NativeType {
         NativeType::String
@@ -57,10 +51,10 @@ impl ExArgType for ImplAsRefStr {
             },
 
             ColumnarValue::Scalar(ScalarValue::Utf8(value)) => {
-                consumer.consume(ScalarString(value))
+                consumer.consume(&ScalarString(value))
             }
             ColumnarValue::Scalar(ScalarValue::Utf8View(value)) => {
-                consumer.consume(ScalarString(value))
+                consumer.consume(&ScalarString(value))
             }
 
             ColumnarValue::Scalar(scalar) => {
@@ -73,39 +67,39 @@ impl ExArgType for ImplAsRefStr {
 // TODO implement this in terms of GenericByteArray
 
 impl<'a> ExArrayReader<'a> for &'a StringArray {
-    type ValueType = ImplAsRefStr;
+    type ValueType = &'a str;
 
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(&self, position)
     }
 
     fn get(&self, position: usize) -> Self::ValueType {
-        ImplAsRefStr(self.value(position).into())
+        self.value(position)
     }
 }
 
 impl<'a> ExArrayReader<'a> for &'a StringViewArray {
-    type ValueType = ImplAsRefStr;
+      type ValueType = &'a str;
 
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(&self, position)
     }
 
     fn get(&self, position: usize) -> Self::ValueType {
-        ImplAsRefStr(self.value(position).into())
+        (self.value(position).into())
     }
 }
 
 struct ScalarString(Option<String>);
 
-impl ExArrayReader<'_> for ScalarString {
-    type ValueType = ImplAsRefStr;
+impl<'a> ExArrayReader<'a> for &'a ScalarString {
+   type ValueType = &'a str;
 
     fn is_valid(&self, _position: usize) -> bool {
         self.0.is_some()
     }
 
     fn get(&self, _position: usize) -> Self::ValueType {
-        ImplAsRefStr(self.0.as_deref().unwrap().into())
+        (self.0.as_deref().unwrap().into())
     }
 }

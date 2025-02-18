@@ -142,7 +142,7 @@ fn implement_arg(arg: &NameType) -> Result<(Type, TokenStream, TokenStream)> {
                 return Ok((
                     force_type::<Type>(parse_quote! { FindExArgType<'static, dyn AsRef<#referred>> }),
                     quote! { #arg_name },
-                    quote! { #arg_name.as_ref() },
+                    quote! { #arg_name },
                 ));
             }
         }
