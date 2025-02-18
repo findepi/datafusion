@@ -55,10 +55,10 @@ impl ExArgType for ImplAsRefStr {
             },
 
             ColumnarValue::Scalar(ScalarValue::Utf8(value)) => {
-                consumer.consume(&ScalarString(value))
+                consumer.consume(ScalarString(value))
             }
             ColumnarValue::Scalar(ScalarValue::Utf8View(value)) => {
-                consumer.consume(&ScalarString(value))
+                consumer.consume(ScalarString(value))
             }
 
             ColumnarValue::Scalar(scalar) => {
@@ -70,40 +70,40 @@ impl ExArgType for ImplAsRefStr {
 
 // TODO implement this in terms of GenericByteArray
 
-impl<'a> ExArrayReader for &'a StringArray {
-    type ValueType = &'a str;
+impl ExArrayReader for &StringArray {
+    type ValueType = ImplAsRefStr;
 
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(&self, position)
     }
 
     fn get(&self, position: usize) -> Self::ValueType {
-        (self.value(position).into())
+        ImplAsRefStr(self.value(position).into())
     }
 }
 
-impl<'a> ExArrayReader for &'a StringViewArray {
-    type ValueType = &'a str;
+impl ExArrayReader for &StringViewArray {
+    type ValueType = ImplAsRefStr;
 
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(&self, position)
     }
 
     fn get(&self, position: usize) -> Self::ValueType {
-        (self.value(position).into())
+        ImplAsRefStr(self.value(position).into())
     }
 }
 
 struct ScalarString(Option<String>);
 
-impl<'a> ExArrayReader for &'a ScalarString {
-    type ValueType = &'a str;
+impl ExArrayReader for ScalarString {
+    type ValueType = ImplAsRefStr;
 
     fn is_valid(&self, _position: usize) -> bool {
         self.0.is_some()
     }
 
     fn get(&self, _position: usize) -> Self::ValueType {
-        (self.0.as_deref().unwrap().into())
+        ImplAsRefStr(self.0.as_deref().unwrap().into())
     }
 }
