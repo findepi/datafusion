@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::{ExArgType, ExFindImplementation};
+use crate::arg_type::{ExArgType, ExFindImplementation, ExInstantiable};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use arrow::array::{Array, StringArray, StringViewArray};
 use arrow::datatypes::DataType;
@@ -32,9 +32,11 @@ impl ExFindImplementation for dyn AsRef<str> {
 
 pub struct RefStrArgType;
 
-impl ExArgType for RefStrArgType {
+impl ExInstantiable for RefStrArgType {
     type StackType<'a> = &'a str;
+}
 
+impl ExArgType for RefStrArgType {
     fn logical_type() -> NativeType {
         NativeType::String
     }

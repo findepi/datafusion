@@ -15,19 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::arg_type::ExArgType;
+use crate::arg_type::{ExArgType, ExInstantiable};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
 use std::marker::PhantomData;
 
-impl<T> ExArgType for Option<T>
+impl<T> ExInstantiable for Option<T>
 where
     T: ExArgType,
 {
     type StackType<'a> = Option<T::StackType<'a>>;
+}
 
+impl<T> ExArgType for Option<T>
+where
+    T: ExArgType,
+{
     fn logical_type() -> NativeType {
         T::logical_type()
     }

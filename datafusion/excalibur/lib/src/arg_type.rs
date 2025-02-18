@@ -20,9 +20,11 @@ use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
 
-pub trait ExArgType {
+pub trait ExInstantiable {
     type StackType<'a>;
+}
 
+pub trait ExArgType: ExInstantiable {
     fn logical_type() -> NativeType;
 
     fn decode(
