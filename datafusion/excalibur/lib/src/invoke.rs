@@ -180,7 +180,6 @@ where
                     >(record)
                 };
                 invoke(position, record, out_arg)
-                // invoke(position, (head_arg, tail_args), out_arg)
             },
             builder,
         )

@@ -15,10 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// pub trait ExRetType {
-//     fn data_type() -> DataType;
-// }
-
 pub type FindExOutArgType<T> = <T as ExFindOutImplementation>::Type;
 
 pub trait ExFindOutImplementation {

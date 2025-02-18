@@ -15,20 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::builder::{ExArrayBuilder, ExFullResultType};
-// use crate::ret_type::ExRetType;
 use crate::__private::ExInstantiable;
+use crate::builder::{ExArrayBuilder, ExFullResultType};
 use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
-// impl<T> ExRetType for Option<T>
-// where
-//     T: ExRetType,
-// {
-//     fn data_type() -> DataType {
-//         T::data_type()
-//     }
-// }
 
 impl<T> ExFullResultType for ((), Option<T>)
 where

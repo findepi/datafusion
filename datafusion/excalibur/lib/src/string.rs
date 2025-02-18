@@ -69,8 +69,6 @@ impl ExArgType for RefStrArgType {
     }
 }
 
-// TODO implement this in terms of GenericByteArray
-
 impl<'a> ExArrayReader<'a> for &'a StringArray {
     type ValueType = &'a str;
 

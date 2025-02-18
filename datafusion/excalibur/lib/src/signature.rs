@@ -17,7 +17,6 @@
 
 use crate::arg_type_list::ExArgTypeList;
 use crate::bridge::ExcaliburScalarUdf;
-// use crate::ret_type::ExRetType;
 use crate::builder::ExFullResultType;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
@@ -28,7 +27,6 @@ pub fn create_excalibur_signature<T>() -> ExcaliburSignature
 where
     T: ExcaliburScalarUdf,
     T::ArgumentRustTypes: ExArgTypeList,
-    // T::ReturnRustType: ExRetType,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType,
 {
     ExcaliburSignature {
@@ -46,7 +44,6 @@ where
 }
 
 pub struct ExcaliburSignature {
-    // For now just constant signature
     signature: Signature,
     return_type: DataType,
 }
