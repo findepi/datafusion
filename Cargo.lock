@@ -1981,6 +1981,7 @@ dependencies = [
  "datafusion-common",
  "datafusion-excalibur-macros",
  "datafusion-expr",
+ "datafusion-expr-common",
 ]
 
 [[package]]

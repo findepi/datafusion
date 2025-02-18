@@ -21,6 +21,7 @@ use crate::ret_type::ExRetType;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
 use datafusion_expr::{Signature, Volatility};
+use datafusion_expr_common::signature::Coercion;
 
 pub fn create_excalibur_signature<T>() -> ExcaliburSignature
 where
@@ -30,7 +31,11 @@ where
 {
     ExcaliburSignature {
         signature: Signature::coercible(
-            T::ArgumentRustTypes::type_signature(),
+            T::ArgumentRustTypes::type_signature()
+                .into_iter()
+                // TODO this *exact* is unintentional, see https://github.com/apache/datafusion/pull/14440#discussion_r1959483130
+                .map(Coercion::new_exact)
+                .collect(),
             Volatility::Immutable,
         ),
         return_type: T::ReturnRustType::data_type(),

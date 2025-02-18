@@ -24,6 +24,7 @@ use datafusion_excalibur_macros::excalibur_function;
 use datafusion_expr::{
     ColumnarValue, ScalarFunctionArgs, Signature, TypeSignatureClass, Volatility,
 };
+use datafusion_expr_common::signature::Coercion;
 use std::sync::Arc;
 
 #[excalibur_function]
@@ -43,7 +44,9 @@ fn test_function_signature() {
     assert_eq!(
         udf.signature(),
         &Signature::coercible(
-            vec![TypeSignatureClass::Native(Arc::new(NativeType::Boolean)),],
+            vec![Coercion::new_exact(TypeSignatureClass::Native(Arc::new(
+                NativeType::Boolean
+            )))],
             Volatility::Immutable
         )
     );

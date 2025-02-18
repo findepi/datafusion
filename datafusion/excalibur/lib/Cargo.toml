@@ -33,3 +33,4 @@ arrow = { workspace = true }
 datafusion-common = { workspace = true }
 datafusion-excalibur-macros = { workspace = true }
 datafusion-expr = { workspace = true }
+datafusion-expr-common = { workspace = true }
