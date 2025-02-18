@@ -149,10 +149,11 @@ where
             |position, tail_args, out_arg| {
                 let head_arg: Head::StackType<'_> = reader.get(position);
                 let record = (head_arg, tail_args);
-                // let record: (<Head as ExArgType>::StackType, <Tail as ApplyList>::StackType) = (head_arg, tail_args);
-                // let record = unsafe {
-                //     std::mem::transmute<_, _>(record);
-                // };
+                // FIXME: here we succumb to the borrow checker
+                // SAFETY: the Invoke  is guaranteed not to capture the reference it is given
+                let record = unsafe {
+                    std::mem::transmute::<(Head::StackType<'_>, Tail::StackType<'_>), (Head::StackType<'_>, Tail::StackType<'_>)>(record)
+                };
                 invoke(position, record, out_arg)
                 // invoke(position, (head_arg, tail_args), out_arg)
             },
