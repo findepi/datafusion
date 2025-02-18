@@ -53,10 +53,10 @@ pub fn derive(attributes: EFAttributes, input: InputFnInfo) -> Result<TokenStrea
 fn common_imports() -> TokenStream {
     // Imports for everything but the outermost function signature. Keep them sorted.
     let imports = quote! {
+        use ::datafusion_excalibur::__private::ExInstantiable;
         use ::datafusion_excalibur::__private::ExcaliburScalarUdf;
         use ::datafusion_excalibur::__private::FindExArgType;
         use ::datafusion_excalibur::__private::ScalarUDFImpl;
-        use ::datafusion_excalibur::__private::ExInstantiable;
         use ::datafusion_excalibur::__private::create_excalibur_scalar_udf;
         use ::std::ops::Deref;
         use ::std::sync::Arc;

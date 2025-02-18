@@ -37,8 +37,8 @@ mod string;
 pub mod __private {
     // Re-exports used by the macros.
 
-    pub use crate::arg_type::FindExArgType;
     pub use crate::arg_type::ExInstantiable;
+    pub use crate::arg_type::FindExArgType;
     pub use crate::bridge::ExcaliburScalarUdf;
     pub use crate::scalar_udf::create_excalibur_scalar_udf;
     pub use datafusion_expr::ScalarUDFImpl;
