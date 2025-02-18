@@ -25,6 +25,8 @@ impl<T> ExArgType for Option<T>
 where
     T: ExArgType,
 {
+    type StackType<'a> = Option<T::StackType<'a>>;
+
     fn logical_type() -> NativeType {
         T::logical_type()
     }

@@ -21,6 +21,8 @@ use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
 
 pub trait ExArgType {
+    type StackType<'a>;
+
     fn logical_type() -> NativeType;
 
     fn decode(

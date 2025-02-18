@@ -39,6 +39,8 @@ impl AsRef<str> for ImplAsRefStr {
 }
 
 impl ExArgType for ImplAsRefStr {
+    type StackType<'a> = ImplAsRefStr;
+
     fn logical_type() -> NativeType {
         NativeType::String
     }

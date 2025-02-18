@@ -19,6 +19,8 @@
 macro_rules! primitive_type {
     ($native_type:ty, $dt_option_name:ident, $array_type:ty, $as_array:ident) => {
         impl ExArgType for $native_type {
+            type StackType<'a> = $native_type;
+
             fn logical_type() -> datafusion_common::types::NativeType {
                 arrow::datatypes::DataType::$dt_option_name.into()
             }
