@@ -20,6 +20,7 @@ use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
 use datafusion_common::types::NativeType;
 use datafusion_common::Result;
 use datafusion_expr::ColumnarValue;
+use std::marker::PhantomData;
 
 impl<T> ExArgType for Option<T>
 where
@@ -33,29 +34,33 @@ where
 
     fn decode(
         arg: ColumnarValue,
-        consumer: impl ExArrayReaderConsumer<ValueType = Self>,
+        consumer: impl for<'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
     ) -> Result<()> {
-        let consumer = NullableConsumer { delegate: consumer };
+        let consumer = NullableConsumer {
+            _t: PhantomData,
+            delegate: consumer,
+        };
         T::decode(arg, consumer)
     }
 }
 
-struct NullableConsumer<Delegate> {
+struct NullableConsumer<T, Delegate> {
+    _t: PhantomData<T>,
     delegate: Delegate,
 }
 
-impl<T, Delegate> ExArrayReaderConsumer for NullableConsumer<Delegate>
+impl<T, Delegate> ExArrayReaderConsumer for NullableConsumer<T, Delegate>
 where
-    Delegate: ExArrayReaderConsumer<ValueType = Option<T>>,
+    T: ExArgType,
+    Delegate: for<'a> ExArrayReaderConsumer<ValueType<'a> = Option<T::StackType<'a>>>,
 {
-    type ValueType = T;
+    type ValueType<'a> = T::StackType<'a>;
 
-    fn consume<AR>(self, reader: AR) -> Result<()>
+    fn consume<'a, AR>(self, reader: AR) -> Result<()>
     where
-        AR: ExArrayReader<ValueType = Self::ValueType>,
+        AR: ExArrayReader<'a, ValueType = Self::ValueType<'a>>,
     {
-        let NullableConsumer { delegate } = self;
-
+        let NullableConsumer { _t: _, delegate } = self;
         let reader = NullableReader { delegate: reader };
         delegate.consume(reader)
     }
@@ -65,9 +70,9 @@ struct NullableReader<Delegate> {
     delegate: Delegate,
 }
 
-impl<Delegate> ExArrayReader for NullableReader<Delegate>
+impl<'a, Delegate> ExArrayReader<'a> for NullableReader<Delegate>
 where
-    Delegate: ExArrayReader,
+    Delegate: ExArrayReader<'a>,
 {
     type ValueType = Option<Delegate::ValueType>;
 
@@ -85,7 +90,7 @@ where
 }
 
 // Generic reader for scalar values
-impl<T> ExArrayReader for Option<T>
+impl<T> ExArrayReader<'_> for Option<T>
 where
     T: Copy,
 {

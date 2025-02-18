@@ -47,7 +47,7 @@ impl ExArgType for ImplAsRefStr {
 
     fn decode(
         arg: ColumnarValue,
-        consumer: impl ExArrayReaderConsumer<ValueType = Self>,
+        consumer: impl for <'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
     ) -> Result<()> {
         match arg {
             ColumnarValue::Array(array) => match array.data_type() {
@@ -72,7 +72,7 @@ impl ExArgType for ImplAsRefStr {
 
 // TODO implement this in terms of GenericByteArray
 
-impl ExArrayReader for &StringArray {
+impl<'a> ExArrayReader<'a> for &'a StringArray {
     type ValueType = ImplAsRefStr;
 
     fn is_valid(&self, position: usize) -> bool {
@@ -84,7 +84,7 @@ impl ExArrayReader for &StringArray {
     }
 }
 
-impl ExArrayReader for &StringViewArray {
+impl<'a> ExArrayReader<'a> for &'a StringViewArray {
     type ValueType = ImplAsRefStr;
 
     fn is_valid(&self, position: usize) -> bool {
@@ -98,7 +98,7 @@ impl ExArrayReader for &StringViewArray {
 
 struct ScalarString(Option<String>);
 
-impl ExArrayReader for ScalarString {
+impl ExArrayReader<'_> for ScalarString {
     type ValueType = ImplAsRefStr;
 
     fn is_valid(&self, _position: usize) -> bool {

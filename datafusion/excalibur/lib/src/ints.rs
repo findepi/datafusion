@@ -44,7 +44,7 @@ primitive_type!(u16, UInt16, UInt16Array, as_uint16_array);
 primitive_type!(u32, UInt32, UInt32Array, as_uint32_array);
 primitive_type!(u64, UInt64, UInt64Array, as_uint64_array);
 
-impl<T> ExArrayReader for &PrimitiveArray<T>
+impl<'a, T> ExArrayReader<'a> for &'a PrimitiveArray<T>
 where
     T: ArrowPrimitiveType,
 {

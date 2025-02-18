@@ -17,7 +17,7 @@
 
 use datafusion_common::Result;
 
-pub trait ExArrayReader {
+pub trait ExArrayReader<'a> {
     type ValueType;
 
     // TODO use this for loop unswitching
@@ -44,9 +44,9 @@ pub trait ExArrayReader {
 }
 
 pub trait ExArrayReaderConsumer {
-    type ValueType;
+    type ValueType<'a>;
 
-    fn consume<AR>(self, reader: AR) -> Result<()>
+    fn consume<'a, AR>(self, reader: AR) -> Result<()>
     where
-        AR: ExArrayReader<ValueType = Self::ValueType>;
+        AR: ExArrayReader<'a, ValueType = Self::ValueType<'a>>;
 }

@@ -27,7 +27,7 @@ pub trait ExArgType {
 
     fn decode(
         arg: ColumnarValue,
-        consumer: impl ExArrayReaderConsumer<ValueType = Self>,
+        consumer: impl for <'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
     ) -> Result<()>;
 }
 

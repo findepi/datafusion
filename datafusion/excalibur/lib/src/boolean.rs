@@ -28,7 +28,7 @@ use std::sync::Arc;
 
 primitive_type!(bool, Boolean, BooleanArray, as_boolean_array);
 
-impl ExArrayReader for &BooleanArray {
+impl<'a> ExArrayReader<'a> for &'a BooleanArray {
     type ValueType = bool;
 
     fn is_valid(&self, position: usize) -> bool {

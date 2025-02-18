@@ -27,7 +27,7 @@ use std::collections::VecDeque;
 pub fn excalibur_invoke<'a, T>(args: ScalarFunctionArgs, _: &'a()) -> Result<ColumnarValue>
 where
     T: ExcaliburScalarUdf,
-    T::ArgumentRustTypes<'a>: ApplyList,
+    T::ArgumentRustTypes: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
             OutArg = T::OutArgRustType,
@@ -60,6 +60,8 @@ where
 }
 
 pub trait ApplyList {
+    type StackType<'a>;
+
     fn apply<Builder, Valid, Invoke>(
         args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -70,7 +72,7 @@ pub trait ApplyList {
     where
         Builder: ExArrayBuilder,
         Valid: Fn(usize) -> bool,
-        Invoke: Fn(usize, Self, &mut Builder::OutArg) -> Builder::Return;
+        Invoke: for <'a> Fn(usize, Self::StackType<'a>, &mut Builder::OutArg) -> Builder::Return;
 }
 
 impl<Head, Tail> ApplyList for (Head, Tail)
@@ -78,6 +80,8 @@ where
     Head: ExArgType,
     Tail: ApplyList,
 {
+    type StackType<'a> = (Head::StackType<'a>, Tail::StackType<'a>);
+
     fn apply<Builder, Valid, Invoke>(
         mut args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -88,7 +92,7 @@ where
     where
         Builder: ExArrayBuilder,
         Valid: Fn(usize) -> bool,
-        Invoke: Fn(usize, Self, &mut Builder::OutArg) -> Builder::Return,
+        Invoke: for <'a> Fn(usize, Self::StackType<'a>, &mut Builder::OutArg) -> Builder::Return,
     {
         let arg = args.pop_front().unwrap();
         let continuation = ApplyListHeadConsumer {
@@ -117,16 +121,17 @@ struct ApplyListHeadConsumer<'a, Head, Tail, Builder, Valid, Invoke> {
 impl<Head, Tail, Builder, Valid, Invoke> ExArrayReaderConsumer
     for ApplyListHeadConsumer<'_, Head, Tail, Builder, Valid, Invoke>
 where
+    Head: ExArgType,
     Tail: ApplyList,
     Builder: ExArrayBuilder,
     Valid: Fn(usize) -> bool,
-    Invoke: Fn(usize, (Head, Tail), &mut Builder::OutArg) -> Builder::Return,
+    Invoke: for <'a> Fn(usize, (Head::StackType<'a>, Tail::StackType<'a>), &mut Builder::OutArg) -> Builder::Return,
 {
-    type ValueType = Head;
+    type ValueType<'a> = Head::StackType<'a>;
 
-    fn consume<AR>(self, reader: AR) -> Result<()>
+    fn consume<'a, AR>(self, reader: AR) -> Result<()>
     where
-        AR: ExArrayReader<ValueType = Head>,
+        AR: ExArrayReader<'a, ValueType = Self::ValueType<'a>>,
     {
         let ApplyListHeadConsumer {
             remaining_args: args,
@@ -142,8 +147,14 @@ where
             number_rows,
             |position| valid(position) && reader.is_valid(position),
             |position, tail_args, out_arg| {
-                let head_arg: Head = reader.get(position);
-                invoke(position, (head_arg, tail_args), out_arg)
+                let head_arg: Head::StackType<'_> = reader.get(position);
+                let record = (head_arg, tail_args);
+                // let record: (<Head as ExArgType>::StackType, <Tail as ApplyList>::StackType) = (head_arg, tail_args);
+                // let record = unsafe {
+                //     std::mem::transmute<_, _>(record);
+                // };
+                invoke(position, record, out_arg)
+                // invoke(position, (head_arg, tail_args), out_arg)
             },
             builder,
         )
@@ -151,6 +162,8 @@ where
 }
 
 impl ApplyList for () {
+    type StackType<'a> = ();
+
     fn apply<Builder, Valid, Invoke>(
         args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -161,7 +174,7 @@ impl ApplyList for () {
     where
         Builder: ExArrayBuilder,
         Valid: Fn(usize) -> bool,
-        Invoke: Fn(usize, Self, &mut Builder::OutArg) -> Builder::Return,
+        Invoke: for <'a> Fn(usize, Self::StackType<'a>, &mut Builder::OutArg) -> Builder::Return,
     {
         assert!(args.is_empty());
         for position in 0..number_rows {
