@@ -30,13 +30,13 @@ pub trait ExcaliburScalarUdf {
     type ArgumentRustTypes: ExInstantiable;
 
     // T for `&mut T` passed to the function or () is there is no out argument
-    type OutArgRustType;
+    type OutArgRustType: ExInstantiable;
 
     // for example i32 for my_function(..) -> i32
     type ReturnRustType;
 
     fn invoke(
         regular_args: <Self::ArgumentRustTypes as ExInstantiable>::StackType<'_>,
-        out_arg: &mut Self::OutArgRustType,
+        out_arg: &mut <Self::OutArgRustType as ExInstantiable>::StackType<'_>,
     ) -> Self::ReturnRustType;
 }

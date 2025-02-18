@@ -16,16 +16,17 @@
 // under the License.
 
 use crate::arg_type::{ExArgType, ExFindImplementation, ExInstantiable};
+use crate::builder::{ExArrayBuilder, ExFullResultType};
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
-use crate::ret_type::{ExFindOutImplementation};
-use arrow::array::{Array, ArrayRef, StringArray, StringBuilder, StringViewArray, StringViewBuilder};
+use crate::ret_type::ExFindOutImplementation;
+use crate::ValuePresence;
+use arrow::array::{Array, ArrayRef, StringArray, StringBuilder, StringViewArray};
 use arrow::datatypes::DataType;
 use datafusion_common::cast::{as_string_array, as_string_view_array};
 use datafusion_common::types::NativeType;
 use datafusion_common::ScalarValue;
 use datafusion_common::{internal_err, Result};
 use datafusion_expr::ColumnarValue;
-use crate::builder::{ExArrayBuilder, ExFullResultType};
 
 impl ExFindImplementation for dyn AsRef<str> {
     type Type = RefStrArgType;
@@ -113,30 +114,43 @@ impl ExFindOutImplementation for dyn std::fmt::Write {
 
 pub struct StringWriter;
 
-// impl ExRetType for StringWriter {
-//     fn data_type() -> DataType {
-//         DataType::Utf8View
-//     }
-// }
-
-impl ExFullResultType for (StringWriter, Result<()>) {
-    type BuilderType = StringViewBuilder;
+impl ExFullResultType for (StringWriter, Result<ValuePresence>) {
+    type BuilderType = StringBuilder;
 
     fn data_type() -> DataType {
         DataType::Utf8View
     }
 
     fn builder_with_capacity(number_rows: usize) -> Self::BuilderType {
-        StringViewBuilder::with_capacity(number_rows * 10)
+        StringBuilder::with_capacity(number_rows, number_rows * 10)
     }
 }
 
-impl ExArrayBuilder for StringViewBuilder {
-    type OutArg = StringWriter;
-    type Return = Result<()>;
+impl ExInstantiable for StringWriter {
+    type StackType<'a> = StringBuilderWriter<'a>;
+}
 
-    fn get_out_arg(&mut self, position: usize) -> &mut Self::OutArg {
-        todo!()
+pub struct StringBuilderWriter<'a> {
+    builder: &'a mut StringBuilder,
+}
+
+impl std::fmt::Write for StringBuilderWriter<'_> {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        self.builder
+            .write_str(s)
+            .map_err(|e| std::fmt::Error::default())
+    }
+}
+
+impl ExArrayBuilder for StringBuilder {
+    type OutArg = StringWriter;
+    type Return = Result<ValuePresence>;
+
+    fn get_out_arg(
+        &mut self,
+        _position: usize,
+    ) -> <Self::OutArg as ExInstantiable>::StackType<'_> {
+        StringBuilderWriter { builder: self }
     }
 
     fn append(&mut self, fn_ret: Self::Return) -> Result<()> {

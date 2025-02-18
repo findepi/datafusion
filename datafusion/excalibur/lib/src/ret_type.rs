@@ -27,3 +27,8 @@ pub type FindExOutArgType<T> = <T as ExFindOutImplementation>::Type;
 pub trait ExFindOutImplementation {
     type Type;
 }
+
+pub enum ValuePresence {
+    Value,
+    Null,
+}

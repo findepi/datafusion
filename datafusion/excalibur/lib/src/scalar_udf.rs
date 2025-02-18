@@ -28,6 +28,7 @@ use std::any::Any;
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 use std::sync::Arc;
+use crate::__private::ExInstantiable;
 
 pub fn create_excalibur_scalar_udf<T>() -> Arc<dyn ScalarUDFImpl>
 where
@@ -37,7 +38,7 @@ where
     //T::ReturnRustType: ExRetType,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
-            OutArg = T::OutArgRustType,
+      OutArg: for<'a> ExInstantiable<StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>>,
             Return = T::ReturnRustType,
         >,
     >,
@@ -68,7 +69,7 @@ where
     T::ArgumentRustTypes: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
-            OutArg = T::OutArgRustType,
+            OutArg: for<'a> ExInstantiable<StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>>,
             Return = T::ReturnRustType,
         >,
     >,

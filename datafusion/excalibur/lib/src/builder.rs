@@ -18,6 +18,7 @@
 use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use datafusion_common::Result;
+use crate::__private::ExInstantiable;
 
 pub trait ExFullResultType {
     type BuilderType: ExArrayBuilder;
@@ -28,10 +29,10 @@ pub trait ExFullResultType {
 }
 
 pub trait ExArrayBuilder {
-    type OutArg;
+    type OutArg: ExInstantiable;
     type Return;
 
-    fn get_out_arg(&mut self, position: usize) -> &mut Self::OutArg;
+    fn get_out_arg(&mut self, position: usize) -> <Self::OutArg as ExInstantiable>::StackType<'_>;
 
     fn append(&mut self, fn_ret: Self::Return) -> Result<()>;
 
@@ -39,3 +40,8 @@ pub trait ExArrayBuilder {
 
     fn build(self) -> Result<ArrayRef>;
 }
+
+impl ExInstantiable for () {
+    type StackType<'a> = ();
+}
+

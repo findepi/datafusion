@@ -90,10 +90,8 @@ where
     type OutArg = ();
     type Return = T::Native;
 
-    fn get_out_arg(&mut self, _position: usize) -> &mut Self::OutArg {
-        static mut EMPTY_TUPLE: () = ();
-        // SAFETY: the empty tuple has no mutable interior anyway
-        unsafe { &mut EMPTY_TUPLE }
+    fn get_out_arg(&mut self, _position: usize) -> Self::OutArg {
+        ()
     }
 
     fn append(&mut self, fn_ret: T::Native) -> Result<()> {

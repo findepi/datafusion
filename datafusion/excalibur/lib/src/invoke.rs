@@ -30,7 +30,7 @@ where
     T::ArgumentRustTypes: ApplyList,
     (T::OutArgRustType, T::ReturnRustType): ExFullResultType<
         BuilderType: ExArrayBuilder<
-            OutArg = T::OutArgRustType,
+            OutArg: for<'a> ExInstantiable<StackType<'a> = <T::OutArgRustType as ExInstantiable>::StackType<'a>>,
             Return = T::ReturnRustType,
         >,
     >,
@@ -75,7 +75,7 @@ pub trait ApplyList: ExInstantiable {
         Invoke: for<'a> Fn(
             usize,
             Self::StackType<'a>,
-            &mut Builder::OutArg,
+            &mut <Builder::OutArg as ExInstantiable>::StackType<'_>,
         ) -> Builder::Return;
 }
 
@@ -107,7 +107,7 @@ where
         Invoke: for<'a> Fn(
             usize,
             Self::StackType<'a>,
-            &mut Builder::OutArg,
+            &mut <Builder::OutArg as ExInstantiable>::StackType<'_>,
         ) -> Builder::Return,
     {
         let arg = args.pop_front().unwrap();
@@ -144,7 +144,7 @@ where
     Invoke: for<'a> Fn(
         usize,
         (Head::StackType<'a>, Tail::StackType<'a>),
-        &mut Builder::OutArg,
+        &mut <Builder::OutArg as ExInstantiable>::StackType<'_>,
     ) -> Builder::Return,
 {
     type ValueType<'a> = Head::StackType<'a>;
@@ -185,13 +185,9 @@ where
     }
 }
 
-impl ExInstantiable for () {
-    type StackType<'a> = ();
-}
-
 impl ApplyList for () {
     const ARITY: usize = 0;
-    
+
     fn apply<Builder, Valid, Invoke>(
         args: VecDeque<ColumnarValue>,
         number_rows: usize,
@@ -205,14 +201,16 @@ impl ApplyList for () {
         Invoke: for<'a> Fn(
             usize,
             Self::StackType<'a>,
-            &mut Builder::OutArg,
+            &mut <Builder::OutArg as ExInstantiable>::StackType<'_>,
         ) -> Builder::Return,
     {
         assert!(args.is_empty());
         for position in 0..number_rows {
             if valid(position) {
-                let out_arg: &mut Builder::OutArg = builder.get_out_arg(position);
-                let result = invoke(position, (), out_arg);
+                let mut out_arg:  <Builder::OutArg as ExInstantiable>::StackType<'_> =
+                    builder.get_out_arg(position);
+                let result = invoke(position, (), &mut out_arg);
+                drop(out_arg);
                 builder.append(result)?;
             } else {
                 builder.append_null()?;

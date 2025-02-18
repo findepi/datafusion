@@ -32,6 +32,8 @@ mod scalar_udf;
 mod signature;
 mod string;
 
+pub use ret_type::ValuePresence;
+
 // Not public API.
 #[doc(hidden)]
 pub mod __private {
