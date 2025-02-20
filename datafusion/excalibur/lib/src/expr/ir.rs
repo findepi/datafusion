@@ -15,35 +15,33 @@
 // specific language governing permissions and limitations
 // under the License.
 
-mod arg_type;
-mod arg_type_list;
-mod boolean;
-mod bridge;
-mod builder;
-// mod expr;
-mod ints;
-mod invoke;
-mod option_arg;
-mod option_ret;
-mod primitives;
-mod reader;
-mod result;
-mod ret_type;
-mod scalar_udf;
-mod signature;
-mod string;
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Expr {
+    Integer(i64),
+    Variable(String),
+    ArithmeticBinary(Box<Expr>, ArithmeticOp, Box<Expr>),
+    ComparisonBinary(Box<Expr>, ComparisonOp, Box<Expr>),
+    Call(Function, Vec<Expr>),
+}
 
-pub use ret_type::ValuePresence;
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum ArithmeticOp {
+    Add,
+    Subtract,
+}
 
-// Not public API.
-#[doc(hidden)]
-pub mod __private {
-    // Re-exports used by the macros.
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum ComparisonOp {
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
+    Equal,
+    NotEqual,
+}
 
-    pub use crate::arg_type::ExInstantiable;
-    pub use crate::arg_type::FindExArgType;
-    pub use crate::bridge::ExcaliburScalarUdf;
-    pub use crate::ret_type::FindExOutArgType;
-    pub use crate::scalar_udf::create_excalibur_scalar_udf;
-    pub use datafusion_expr::ScalarUDFImpl;
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Function {
+    Min,
+    Max,
 }
