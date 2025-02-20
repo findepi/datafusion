@@ -1979,11 +1979,14 @@ name = "datafusion-excalibur"
 version = "45.0.0"
 dependencies = [
  "arrow",
+ "criterion",
  "datafusion-common",
  "datafusion-excalibur-macros",
  "datafusion-expr",
  "datafusion-expr-common",
+ "datafusion-functions",
  "linked-hash-map",
+ "rand 0.8.5",
 ]
 
 [[package]]

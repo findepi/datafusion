@@ -28,6 +28,10 @@ rust-version = { workspace = true }
 [lints]
 workspace = true
 
+[lib]
+# Only explicit benchmarks (https://bheisler.github.io/criterion.rs/book/faq.html#cargo-bench-gives-unrecognized-option-errors-for-valid-command-line-options)
+bench = false
+
 [dependencies]
 arrow = { workspace = true }
 datafusion-common = { workspace = true }
@@ -35,3 +39,12 @@ datafusion-excalibur-macros = { workspace = true }
 datafusion-expr = { workspace = true }
 datafusion-expr-common = { workspace = true }
 linked-hash-map = "0.5.6"
+
+[dev-dependencies]
+criterion = { workspace = true }
+datafusion-functions = { workspace = true }
+rand = { workspace = true }
+
+[[bench]]
+harness = false
+name = "str_to_int_function"
