@@ -19,7 +19,7 @@ extern crate criterion;
 
 use arrow::array::{Array, ArrayRef};
 use arrow::datatypes::DataType;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use datafusion_excalibur_macros::excalibur_function;
 use datafusion_expr::{ScalarFunctionArgs, ScalarUDF};
 use datafusion_expr_common::columnar_value::ColumnarValue;
@@ -33,56 +33,48 @@ fn character_length(s: &str) -> i32 {
     s.chars().count() as i32
 }
 
-fn criterion_benchmark(c: &mut Criterion) {
+fn benchmark_character_length(c: &mut Criterion) {
     let standard_impl = datafusion_functions::unicode::character_length();
-    let excalibur_impl = Arc::new(ScalarUDF::new_from_shared_impl(excalibur_character_length_udf()));
+    let excalibur_impl = Arc::new(ScalarUDF::new_from_shared_impl(
+        excalibur_character_length_udf(),
+    ));
 
     // All benches are single batch run with 8192 rows
     let n_rows = 8192;
-    for str_len in [8, 32, 128, 4096] {
-        // StringArray ASCII only
-        let input = gen_string_array(n_rows, str_len, 0.1, 0.0, false);
-        let mut group = c.benchmark_group(format!("ascii   {str_len} String"));
-        group.bench_function("standard_impl", |b| {
-            b.iter(|| black_box(standard_impl.invoke_with_args(to_args(&input))))
-        });
-        group.bench_function("excalibur_impl", |b| {
-            b.iter(|| black_box(excalibur_impl.invoke_with_args(to_args(&input))))
-        });
-        group.finish();
-
-        // StringArray UTF8
-        let input = gen_string_array(n_rows, str_len, 0.1, 0.5, false);
-        let mut group = c.benchmark_group(format!("unicode {str_len} String"));
-        group.bench_function("standard_impl", |b| {
-            b.iter(|| black_box(standard_impl.invoke_with_args(to_args(&input))))
-        });
-        group.bench_function("excalibur_impl", |b| {
-            b.iter(|| black_box(excalibur_impl.invoke_with_args(to_args(&input))))
-        });
-        group.finish();
-
-        // StringViewArray ASCII only
-        let input = gen_string_array(n_rows, str_len, 0.1, 0.0, false);
-        let mut group = c.benchmark_group(format!("ascii   {str_len} StringView"));
-        group.bench_function("standard_impl", |b| {
-            b.iter(|| black_box(standard_impl.invoke_with_args(to_args(&input))))
-        });
-        group.bench_function("excalibur_impl", |b| {
-            b.iter(|| black_box(excalibur_impl.invoke_with_args(to_args(&input))))
-        });
-        group.finish();
-
-        // StringViewArray UTF8
-        let input = gen_string_array(n_rows, str_len, 0.1, 0.5, false);
-        let mut group = c.benchmark_group(format!("unicode {str_len} StringView"));
-        group.bench_function("standard_impl", |b| {
-            b.iter(|| black_box(standard_impl.invoke_with_args(to_args(&input))))
-        });
-        group.bench_function("excalibur_impl", |b| {
-            b.iter(|| black_box(excalibur_impl.invoke_with_args(to_args(&input))))
-        });
-        group.finish();
+    // Single global group makes criterion draw all charts on single HTML page in the report
+    let mut c = c.benchmark_group("the group");
+    for (nulls, str_len) in [(false, 8), (true, 8), (true, 32), (true, 128), (true, 4096)]
+    {
+        for input_string_view in [false, true] {
+            for ascii in [true, false] {
+                let input = gen_string_array(
+                    n_rows,
+                    str_len,
+                    if nulls { 0.1 } else { 0.0 },
+                    if ascii { 0.0 } else { 0.5 },
+                    input_string_view,
+                );
+                let group = format!(
+                    "{:7} {:8} {:10}",
+                    if nulls { "nulls" } else { "non-null" },
+                    if ascii { "ascii" } else { "unicode" },
+                    if input_string_view {
+                        "StringView"
+                    } else {
+                        "String"
+                    },
+                );
+                for (name, func) in [
+                    ("standard 🏢", &standard_impl),
+                    ("excalibur 🗡️", &excalibur_impl),
+                ] {
+                    c.bench_function(
+                        BenchmarkId::new(format!("{group}/{name}"), &str_len),
+                        |b| b.iter(|| black_box(func.invoke_with_args(to_args(&input)))),
+                    );
+                }
+            }
+        }
     }
 }
 
@@ -94,5 +86,5 @@ fn to_args(array: &ArrayRef) -> ScalarFunctionArgs<'_> {
     }
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, benchmark_character_length);
 criterion_main!(benches);
