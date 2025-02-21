@@ -69,7 +69,7 @@ fn benchmark_character_length(c: &mut Criterion) {
                     ("excalibur 🗡️", &excalibur_impl),
                 ] {
                     c.bench_function(
-                        BenchmarkId::new(format!("{group}/{name}"), &str_len),
+                        BenchmarkId::new(format!("{group}/{name}"), str_len),
                         |b| b.iter(|| black_box(func.invoke_with_args(to_args(&input)))),
                     );
                 }
