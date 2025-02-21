@@ -21,6 +21,7 @@ mod boolean;
 mod bridge;
 mod builder;
 // mod expr;
+mod decimal;
 mod ints;
 mod invoke;
 mod option_arg;
@@ -33,6 +34,7 @@ mod scalar_udf;
 mod signature;
 mod string;
 
+pub use decimal::Decimal;
 pub use ret_type::ValuePresence;
 
 // Not public API.
