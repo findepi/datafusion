@@ -81,6 +81,10 @@ where
 {
     type ValueType = Option<Delegate::ValueType>;
 
+    fn assert_number_rows(&self, number_rows: usize) {
+        self.delegate.assert_number_rows(number_rows);
+    }
+
     fn is_valid(&self, _position: usize) -> bool {
         true
     }
@@ -100,6 +104,8 @@ where
     T: Copy,
 {
     type ValueType = T;
+
+    fn assert_number_rows(&self, _number_rows: usize) {}
 
     fn is_valid(&self, _position: usize) -> bool {
         self.is_some()

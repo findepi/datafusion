@@ -48,6 +48,10 @@ where
 {
     type ValueType = T::Native;
 
+    fn assert_number_rows(&self, number_rows: usize) {
+        assert_eq!(self.len(), number_rows);
+    }
+
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(self, position)
     }

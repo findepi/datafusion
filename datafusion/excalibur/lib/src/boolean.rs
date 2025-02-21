@@ -29,6 +29,10 @@ primitive_type!(bool, Boolean, BooleanArray, as_boolean_array);
 impl<'a> ExArrayReader<'a> for &'a BooleanArray {
     type ValueType = bool;
 
+    fn assert_number_rows(&self, number_rows: usize) {
+        assert_eq!(self.len(), number_rows);
+    }
+
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(self, position)
     }

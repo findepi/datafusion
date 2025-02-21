@@ -72,17 +72,26 @@ impl ExArgType for RefStrArgType {
 impl<'a> ExArrayReader<'a> for &'a StringArray {
     type ValueType = &'a str;
 
+    fn assert_number_rows(&self, number_rows: usize) {
+        assert_eq!(self.len(), number_rows);
+    }
+
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(&self, position)
     }
 
     fn get(&self, position: usize) -> Self::ValueType {
-        self.value(position)
+        // self.value(position)
+        unsafe { self.value_unchecked(position) }
     }
 }
 
 impl<'a> ExArrayReader<'a> for &'a StringViewArray {
     type ValueType = &'a str;
+
+    fn assert_number_rows(&self, number_rows: usize) {
+        assert_eq!(self.len(), number_rows);
+    }
 
     fn is_valid(&self, position: usize) -> bool {
         Array::is_valid(&self, position)
@@ -97,6 +106,8 @@ struct ScalarString(Option<String>);
 
 impl<'a> ExArrayReader<'a> for &'a ScalarString {
     type ValueType = &'a str;
+
+    fn assert_number_rows(&self, _number_rows: usize) {}
 
     fn is_valid(&self, _position: usize) -> bool {
         self.0.is_some()

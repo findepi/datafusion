@@ -164,6 +164,7 @@ where
             _phantom_head,
             _phantom_tail,
         } = self;
+        reader.assert_number_rows(number_rows);
         Tail::apply(
             args,
             number_rows,

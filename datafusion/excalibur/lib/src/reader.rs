@@ -20,6 +20,8 @@ use datafusion_common::Result;
 pub trait ExArrayReader<'a> {
     type ValueType;
 
+    fn assert_number_rows(&self, number_rows: usize);
+
     // TODO use this for loop unswitching
     /// Returns the length L of the stride of  positions guaranteed to be valid, starting
     /// from the given position S. The position S + L is *not* guaranteed
