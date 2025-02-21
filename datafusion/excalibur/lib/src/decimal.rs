@@ -42,9 +42,7 @@ trait DecimalNativeType: Sized {
         array: &dyn Array,
     ) -> Result<&PrimitiveArray<Self::ArrowDecimalType>>;
 
-    fn cast_scalar(
-        scalar: ScalarValue,
-    ) -> std::result::Result<(Option<Self>, u8, i8), ScalarValue>;
+    fn cast_scalar(scalar: ScalarValue) -> Result<(Option<Self>, u8, i8)>;
 }
 impl DecimalNativeType for i128 {
     type ArrowDecimalType = Decimal128Type;
@@ -55,13 +53,11 @@ impl DecimalNativeType for i128 {
         as_decimal128_array(array)
     }
 
-    fn cast_scalar(
-        scalar: ScalarValue,
-    ) -> std::result::Result<(Option<Self>, u8, i8), ScalarValue> {
+    fn cast_scalar(scalar: ScalarValue) -> Result<(Option<Self>, u8, i8)> {
         if let ScalarValue::Decimal128(value, precision, scale) = scalar {
             Ok((value, precision, scale))
         } else {
-            Err(scalar)
+            internal_err!("Expected Decimal128 scalar, got: {:?}", scalar)
         }
     }
 }
@@ -108,20 +104,14 @@ where
                     scale: decimal_array.scale(),
                 })
             }
-            Scalar(scalar) => match Native::cast_scalar(scalar) {
-                Ok((value, precision, scale)) => consumer.consume(DecimalReader {
+            Scalar(scalar) => {
+                let (value, precision, scale) = Native::cast_scalar(scalar)?;
+                consumer.consume(DecimalReader {
                     delegate: value,
                     precision,
                     scale,
-                }),
-                Err(scalar) => {
-                    internal_err!(
-                        "Expected {} scalar, got: {:?}",
-                        stringify!($native_type),
-                        scalar
-                    )
-                }
-            },
+                })
+            }
         }
     }
 }
