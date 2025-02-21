@@ -81,8 +81,8 @@ impl<'a> ExArrayReader<'a> for &'a StringArray {
     }
 
     fn get(&self, position: usize) -> Self::ValueType {
-        // self.value(position)
-        unsafe { self.value_unchecked(position) }
+        self.value(position)
+        // unsafe { self.value_unchecked(position) }
     }
 }
 
