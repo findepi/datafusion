@@ -24,7 +24,9 @@ The Simple Functions implementation.
 # Outstanding items to cover in near term
 
 - decimal support, p,s injections
-- hot loop unswitching for non-null inputs (ExArrayReader::valid_stride)
+- performance optimizations
+  - input bounds elision? does assert_number_rows or array::value_unchecked change anything? 
+  - hot loop unswitching for non-null inputs (ExArrayReader::valid_stride)
 - ASCII-only-aware string functions such as character_length -- if this improves performance for str_to_int_function benchmark
 
 ...
