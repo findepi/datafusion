@@ -18,7 +18,7 @@
 use crate::__private::ExInstantiable;
 use crate::arg_type::ExArgType;
 use crate::reader::{ExArrayReader, ExArrayReaderConsumer};
-use arrow::array::{Array, ArrowPrimitiveType, Decimal128Array, PrimitiveArray};
+use arrow::array::{Array, ArrowPrimitiveType, PrimitiveArray};
 use arrow::datatypes::{Decimal128Type, DecimalType};
 use datafusion_common::cast::as_decimal128_array;
 use datafusion_common::types::NativeType;
@@ -93,7 +93,7 @@ where
         arg: ColumnarValue,
         consumer: impl for<'a> ExArrayReaderConsumer<ValueType<'a> = Self::StackType<'a>>,
     ) -> Result<()> {
-        use datafusion_common::ScalarValue;
+        
         use datafusion_expr::ColumnarValue::*;
         match arg {
             Array(array) => {
